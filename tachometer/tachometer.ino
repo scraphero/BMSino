@@ -12,6 +12,14 @@ bool estado_contador_anterior = 0;         //Almacenara el estado anterior de la
 int short contador = 0;                    //Aqui ya se almacenara el dato de pulsos de manera decimal
 float pulsos_x_segundo = 0;                //Se almacenara el dato de pulsos por segundo que se obtiene de la ecuacion en la linea 46
 
+//CONSTANTES y variables de RPM
+int short PULSOS_POR_VUELTA = 1;           //Introducir aqui el numero de dientes que tenga la corona para el sensor de pulsos
+float rpm = 0;
+
+//CONSTANTES y variables velocidad_kmh
+float PERIMETRO_RUEDA = 1;                 //Introducir aqui el perimetro de la rueda en km
+float velocidad_kmh = 0;                   //variable que almacenara la velocidad_kmh
+
 void setup()
 {
   Serial.begin(115200);                    //Inicia comunicacion Serial
@@ -21,7 +29,6 @@ void setup()
 
 void loop()
 {
-  //Serial.println("loop");                                    //Prueba, borrar esta linea si todo funciona ok
   tiempo_anterior = tiempo_real;                               //Detenemos aqui el tiempo guardandolo en tiempo anterior
   while(contador < LIMITE_PULSOS)                              //Mientras el numero de pulsos sea inferior a LIMITE_PULSOS
   {
@@ -42,9 +49,12 @@ void loop()
   tiempo_real = millis();                                      //actualizamos tiempo real
   tiempo_medicion = tiempo_real - tiempo_anterior;
   tiempo_medicion_sec = tiempo_medicion / 1000;
+  pulsos_x_segundo = (contador-1) / tiempo_medicion_sec;       //ecuacion pulsos x segundo
+  rpm = pulsos_x_segundo / PULSOS_POR_VUELTA * 60;             //ecuacion para conseguir las rpm
+ 	velocidad_kmh = rpm * PERIMETRO_RUEDA * 60;                      //velocidad_kmh en km/h
+
   //Serial.print("tm ");Serial.print(tiempo_medicion);Serial.print("   tr ");Serial.print(tiempo_real); Serial.print("   ta ");Serial.print(tiempo_anterior);
-  pulsos_x_segundo = (contador-1) / tiempo_medicion_sec;        //ecuacion pulsos x segundo
   //Serial.print("   cont ");Serial.print(contador-1);Serial.print("   tms ");Serial.print(tiempo_medicion_sec,3);
-  Serial.print("   p/s "); Serial.println(pulsos_x_segundo,3);
+  Serial.print("   p/s "); Serial.println(pulsos_x_segundo,3); 
   contador = 0;
 }
