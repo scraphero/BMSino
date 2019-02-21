@@ -34,11 +34,15 @@ void medicion_periodica()
   bateriaRestante = bateriaRestante - corriente_hall;                           //Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
   porcentaje_bateria = (bateriaRestante / 162000)*100;                          //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
   
-  autonomia_segundos_totales = bateriaRestante / corriente_hall;                        //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
-  autonomia_segundos = autonomia_segundos_totales % 60;
+  autonomia_segundos_totales = bateriaRestante / corriente_hall;                //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
+  autonomia_segundos = autonomia_segundos_totales % 60;                         //
   autonomia_minutos_totales = autonomia_segundos_totales / 60;
   autonomia_minutos = autonomia_minutos_totales % 60;
   autonomia_horas_totales = autonomia_minutos_totales / 60;
+
+
+//                                 PRINTS PARA DEBUG
+//{ No descomentar esta linea
 
   //Serial.print("tiempo real:");
   //Serial.print(tiempo_real);
@@ -47,31 +51,43 @@ void medicion_periodica()
   //Serial.print("    bateria restante:");
   //Serial.print(bateriaRestante);
   //Serial.print("    ");
-  Serial.print(porcentaje_bateria);         //Serial print porcentaje bateria
-  Serial.print("%    ");
 
-  Serial.print("Autonomia:");
-  Serial.print(autonomia_segundos_totales);         //Serial print autonomia en segundos totales
-  Serial.print("s left    ");
+  //Serial.print("Au: ");
+  //Serial.print(autonomia_segundos_totales);        //Serial print autonomia en segundos totales
+  //Serial.print("s left    ");
+  
+  //Serial.print("    Voltaje sensor: ");
+  //Serial.print(voltajeSensor);                     //Voltaje del sensor Hall
+//} No descomentar esta linea
 
-  Serial.print(autonomia_horas_totales);
-  Serial.print("h");
-  Serial.print(autonomia_minutos);
-  Serial.print("m");
-  Serial.print(autonomia_segundos);
+  if (porcentaje_bateria < 100) { Serial.print(0); }  //para mostrar 1 cero a la izquierda en caso de que el valor sea de 2 cifras
+  if (porcentaje_bateria < 10) { Serial.print(00); }  //para mostrar 2 ceros a la izquierda en caso de que el valor sea de 1 cifras
+  Serial.print(porcentaje_bateria);                   //Serial print porcentaje bateria
+  Serial.print("% ");
+
+autonomia_horas_totales = 0 ;
+  if ( autonomia_horas_totales < 0 ) { Serial.print ("-"); }
+  if ( autonomia_horas_totales >= 0 ) { Serial.print ("+"); }
+  Serial.print( abs ( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia   
+  Serial.print("h ");
+  
+  if ( ( autonomia_minutos < 10 ) && (autonomia_minutos > -10 ) ) { Serial.print(0); }   //para mostrar 1 ceros a la izquierda en caso de que el valor sea de 1 cifras
+  Serial.print ( abs ( autonomia_minutos ) );                   //Minutos restantes de autonomia
+  Serial.print("m ");
+  
+  if (autonomia_segundos < 10) { Serial.print(0); }  //para mostrar 1 ceros a la izquierda en caso de que el valor sea de 1 cifras
+  Serial.print(autonomia_segundos);                  //Segundos restantes de autonomia
   Serial.print("s");
 
-  Serial.print("    Voltaje sensor: ");
-  Serial.print(voltajeSensor);
 
-  Serial.print("    W: "); //Watios
-  Serial.print(Watt);
+  Serial.print("    W: ");
+  Serial.print(Watt);                                //Print Potencia
   
-  Serial.print("    V: "); //Voltios
-  Serial.print(voltajeBatt);
+  Serial.print("    V: ");
+  Serial.print(voltajeBatt);                         //Print Tension
   
-  Serial.print("    A: "); //Amperios
-  Serial.println(corriente_hall,2); 
+  Serial.print(" A:");
+  Serial.println ( abs ( corriente_hall ) , 2 ) ;    //Print Corriente
 
   tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;    //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
 }
