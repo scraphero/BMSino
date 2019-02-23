@@ -14,13 +14,13 @@ const float SENSIBILIDAD = 65;         //sensibilidad en Voltios/Amperio para se
 const float CORRECT_VOLT_BATT = 49.8;  //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria le llegan 5
 
 /*BATERIA*/
-const int TIEMPO_DE_LECTURA = 100;     //sera el tiempo en milisegundos 
-float bateriaRestante = 162000;        //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
-int tiempo_medicion = 0;               //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
-const int DELAY_MEDICION = 1;          //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
-int porcentaje_bateria = 0;            //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
-int long autonomia_segundos_totales = 0;       //Medira la autonomia instantanea expresada en segundos
-int short autonomia_segundos = 0;
+const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
+float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
+int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
+const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
+int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
+int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
+int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
 int long autonomia_minutos_totales = 0;
 int short autonomia_minutos = 0;
 int long autonomia_horas_totales = 0;
@@ -34,11 +34,11 @@ void medicion_periodica()
   bateriaRestante = bateriaRestante - corriente_hall;                           //Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
   porcentaje_bateria = (bateriaRestante / 162000)*100;                          //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
   
-  autonomia_segundos_totales = bateriaRestante / corriente_hall;                //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
-  autonomia_segundos = autonomia_segundos_totales % 60;                         //
-  autonomia_minutos_totales = autonomia_segundos_totales / 60;
-  autonomia_minutos = autonomia_minutos_totales % 60;
-  autonomia_horas_totales = autonomia_minutos_totales / 60;
+  autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;                //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
+  autonomia_segundos = autonomia_segundos_totales % 60;                         //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
+  autonomia_minutos_totales = autonomia_segundos_totales / 60;                  //minutos restantes totales es el valor resultante de dividir los segundos totales entre 60
+  autonomia_minutos = autonomia_minutos_totales % 60;                           //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
+  autonomia_horas_totales = autonomia_minutos_totales / 60;                     //
 
 
 //                                 PRINTS PARA DEBUG
@@ -60,18 +60,18 @@ void medicion_periodica()
   //Serial.print(voltajeSensor);                     //Voltaje del sensor Hall
 //} No descomentar esta linea
 
-  if (porcentaje_bateria < 100) { Serial.print(0); }  //para mostrar 1 cero a la izquierda en caso de que el valor sea de 2 cifras
+  if (porcentaje_bateria < 100) { Serial.print(0); }  //para mostrar 1 cero a la izquierda en caso de que el valor sea de 2 cifras esto es necesario para mantener el string estable
   if (porcentaje_bateria < 10) { Serial.print(00); }  //para mostrar 2 ceros a la izquierda en caso de que el valor sea de 1 cifras
   Serial.print(porcentaje_bateria);                   //Serial print porcentaje bateria
   Serial.print("% ");
 
-autonomia_horas_totales = 0 ;
-  if ( autonomia_horas_totales < 0 ) { Serial.print ("-"); }
-  if ( autonomia_horas_totales >= 0 ) { Serial.print ("+"); }
-  Serial.print( abs ( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia   
+  //autonomia_horas_totales = 0 ; //DEBUG
+  if ( autonomia_horas_totales < 100 ) { Serial.print(0); }   //otra vez ceros a la izquierda
+  if ( autonomia_horas_totales < 10 ) { Serial.print(00); }   //
+  Serial.print( autonomia_horas_totales ) ;  //Horas restantes de autonomia   
   Serial.print("h ");
   
-  if ( ( autonomia_minutos < 10 ) && (autonomia_minutos > -10 ) ) { Serial.print(0); }   //para mostrar 1 ceros a la izquierda en caso de que el valor sea de 1 cifras
+  if ( autonomia_minutos < 10 ) { Serial.print(0); }   //para mostrar 1 ceros a la izquierda en caso de que el valor sea de 1 cifras
   Serial.print ( abs ( autonomia_minutos ) );                   //Minutos restantes de autonomia
   Serial.print("m ");
   
@@ -86,8 +86,9 @@ autonomia_horas_totales = 0 ;
   Serial.print("    V: ");
   Serial.print(voltajeBatt);                         //Print Tension
   
+  if ( corriente_hall > 0 ) { serial.print( "+" ) ; }
   Serial.print(" A:");
-  Serial.println ( abs ( corriente_hall ) , 2 ) ;    //Print Corriente
+  Serial.println ( corriente_hall, 2 ) ;    //Print Corriente
 
   tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;    //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
 }
@@ -101,7 +102,7 @@ void loop()                               //LOOP
 {
   tiempo_real = (millis()/1000);          //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
 
-  if ( tiempo_medicion == tiempo_real )   //Al final de la funcion medicion_periodica le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
+  if ( tiempo_medicion <= tiempo_real )   //Al final de la funcion medicion_periodica le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
   {
     medicion_periodica();                 //Llamada a la funcion que engloba las mediciones sobre la bateria y sus calculos V, corriente_hall, W, bateria restante etc.
   }
