@@ -25,6 +25,8 @@ int long autonomia_minutos_totales = 0;
 int short autonomia_minutos = 0;
 int long autonomia_horas_totales = 0;
 
+int valor_prueba = 0 ;
+
 void end_send_nextion()
 {
   Serial.write(0xff);
@@ -34,6 +36,7 @@ void end_send_nextion()
 
 void medicion_periodica()
 {
+
     float voltajeSensor= analogRead(PIN_AMP_METER)*(5.0 / 1023.0);                //lectura del sensor hall, medida transformada en valores de 0 a 5 para conocer el valor de tension real del output del sensor HALL
     float corriente_hall = ( voltajeSensor + CORRECT_VOLT_HALL ) * SENSIBILIDAD;  //Ecuación  para obtener la corriente a partir del valor anterior, ajuste de offset y sensibilidad, convertir la señal de voltaje output del sensor HALL en el valor de corriente real
     float voltajeBatt= analogRead(PIN_VOLT_METER)*(CORRECT_VOLT_BATT / 1023.0);   //lectura de volaje 
@@ -47,6 +50,8 @@ void medicion_periodica()
     autonomia_minutos = autonomia_minutos_totales % 60;                           //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
     autonomia_horas_totales = autonomia_minutos_totales / 60;                     //horas de autonomia es el resultado de dividir los minutos totales entre 60
 
+    valor_prueba = valor_prueba + 1 ;
+    if ( valor_prueba > 100 ){ valor_prueba = 0 ; }
 
 
   //{ Prints DEBUG
@@ -67,23 +72,21 @@ void medicion_periodica()
     //Serial.print(voltajeSensor);                     //Voltaje del sensor Hall
   //}
 
-  //{ Serial Print PORCENTAJE BATERIA
-
-    //Print para pantalla NEXTION
+  //{ Print para pantalla NEXTION
     Serial.print( "j0.val=" );
-    Serial.print( porcentaje_bateria );
+    Serial.print( valor_prueba );
     end_send_nextion();
-
-    //Print en forma de STRING                            Print en forma de STRING
-    /*if (porcentaje_bateria < 100) { Serial.print(0); }  //para mostrar 1 cero a la izquierda en caso de que el valor sea de 2 cifras esto es necesario para mantener el string estable
-    if (porcentaje_bateria < 10) { Serial.print(00); }    //para mostrar 2 ceros a la izquierda en caso de que el valor sea de 1 cifras
-    Serial.print(porcentaje_bateria);                     //Serial print porcentaje bateria
-    Serial.print("% ");*/                                 //Mostrar el simbolo de porcentaje tras el valor
-
   //}
 
 
-  //{ Serial print AUTONOMIA
+  /*//{ Print STRING PORCENTAJE BATERIA
+    if (porcentaje_bateria < 100) { Serial.print(0); }  //para mostrar 1 cero a la izquierda en caso de que el valor sea de 2 cifras esto es necesario para mantener el string estable
+    if (porcentaje_bateria < 10) { Serial.print(00); }    //para mostrar 2 ceros a la izquierda en caso de que el valor sea de 1 cifras
+    Serial.print(porcentaje_bateria);                     //Serial print porcentaje bateria
+    Serial.print("% ");                                //Mostrar el simbolo de porcentaje tras el valor
+  //}*/
+
+  /*//{ Print STRING AUTONOMIA
     //autonomia_horas_totales = 0 ; //DEBUG
     if ( autonomia_horas_totales < 100 ) { Serial.print(0); }   //otra vez ceros a la izquierda
     if ( autonomia_horas_totales < 10 ) { Serial.print(00); }   //
@@ -97,9 +100,9 @@ void medicion_periodica()
     if (autonomia_segundos < 10) { Serial.print(0); }  //para mostrar 1 ceros a la izquierda en caso de que el valor sea de 1 cifras
     Serial.print(autonomia_segundos);                  //Segundos restantes de autonomia
     Serial.print("s");
-  //}
+  //}*/
 
-  //{ Serial Print POTENCIA
+  /*//{ Print STRING POTENCIA
     //Watt = 11111.1;                                                    //DEBUG
     Serial.print(" W:");                                             //imprime el indicador de watios para hacer mas comprensible el string
     if ( Watt >= 0 ) { Serial.print( "+" ); }                        //imprime signo positivo
@@ -110,25 +113,25 @@ void medicion_periodica()
     if ( (Watt < 100) && (Watt >= 10) ) { Serial.print("00"); }      //para mostrar 2 ceros a la izquierda en caso de que el valor sea de 1 cifras
     if ( Watt < 10 ) { Serial.print("000"); }                        //para mostrar 3 ceros a la izquierda en caso de que el valor sea de 1 cifras
     Serial.print( Watt );                                            //Print Potencia
-  //}
+  //}*/
 
-  //{ Serial Print TENSION BATERIA
+  /*//{ Serial Print TENSION BATERIA
     Serial.print(" V:");
     Serial.print(voltajeBatt);                         //Print Tension
-  //}
+  //}*/
 
-  //{ Serial Print CORRIENTE BATERIA
+  /*//{ Serial Print CORRIENTE BATERIA
     if ( corriente_hall > 0 ) { Serial.print( "+" ) ; }
     Serial.print(" A:");
     Serial.println ( corriente_hall, 2 ) ;    //Print Corriente
-  //}
+  //}*/
 
     tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;    //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
 }
 
 
 void setup() {                            //SETUP
-  Serial.begin(115200);                   //Activar comunicacion serie
+  Serial.begin(9600);                   //Activar comunicacion serie
 }
 
 void loop()                               //LOOP
