@@ -52,8 +52,10 @@ void medicion_periodica()
 
     valor_prueba = valor_prueba + 1 ;
     if ( valor_prueba > 100 ){ valor_prueba = 0 ; }
+}
 
-
+void nextion_prints()
+{
   //{ Prints DEBUG
 
     //Serial.print("tiempo real:");
@@ -153,5 +155,6 @@ void loop()                               //LOOP
   if ( tiempo_medicion <= tiempo_real )   //Al final de la funcion medicion_periodica le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
   {
     medicion_periodica();                 //Llamada a la funcion que engloba las mediciones sobre la bateria y sus calculos V, corriente_hall, W, bateria restante etc.
+    nextion_prints();
   }
 }
