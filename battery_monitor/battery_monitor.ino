@@ -72,12 +72,25 @@ void medicion_periodica()
     //Serial.print(voltajeSensor);                     //Voltaje del sensor Hall
   //}
 
-  //{ Print para pantalla NEXTION
+  //{ Print para NEXTION | PORCENTAJE BATERIA
     Serial.print( "j0.val=" );
-    Serial.print( valor_prueba );
+    Serial.print( porcentaje_bateria );
     end_send_nextion();
   //}
 
+  /*//{ Print para NEXTION | AUTONOMIA h/m/s
+    Serial.print( "" );
+    Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
+    end_send_nextion();
+
+    Serial.print( "" );
+    Serial.print( abs( autonomia_minutos ) );        //Minutos restantes de autonomia
+    end_send_nextion();
+
+    Serial.print( "" );
+    Serial.print( abs( autonomia_segundos ) );        //Segundos restantes de autonomia
+    end_send_nextion();
+  //}*/
 
   /*//{ Print STRING PORCENTAJE BATERIA
     if (porcentaje_bateria < 100) { Serial.print(0); }  //para mostrar 1 cero a la izquierda en caso de que el valor sea de 2 cifras esto es necesario para mantener el string estable
@@ -87,7 +100,6 @@ void medicion_periodica()
   //}*/
 
   /*//{ Print STRING AUTONOMIA
-    //autonomia_horas_totales = 0 ; //DEBUG
     if ( autonomia_horas_totales < 100 ) { Serial.print(0); }   //otra vez ceros a la izquierda
     if ( autonomia_horas_totales < 10 ) { Serial.print(00); }   //
     Serial.print( autonomia_horas_totales ) ;  //Horas restantes de autonomia   
