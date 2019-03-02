@@ -63,7 +63,6 @@ void medicion_periodica()
 void nextion_prints()
 {
   //{ Prints DEBUG
-
     //Serial.print("tiempo real:");
     //Serial.print(tiempo_real);
     //Serial.print("    tiempo medicion");
@@ -80,13 +79,13 @@ void nextion_prints()
     //Serial.print(voltajeSensor);                     //Voltaje del sensor Hall
   //}
 
-  //{ Print para NEXTION | PORCENTAJE BATERIA
+  //{ PORCENTAJE BATERIA | Listo
     Serial.print( "j0.val=" );
     Serial.print( valor_prueba );
     end_send_nextion();
   //}
 
-  /*//{ Print para NEXTION | AUTONOMIA h/m/s
+  /*//{ AUTONOMIA h/m/s
     Serial.print( "" );
     Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
     end_send_nextion();
@@ -100,16 +99,12 @@ void nextion_prints()
     end_send_nextion();
   //}*/
 
-  
-
-
-
-  /*//{ Serial Print TENSION BATERIA
+  /*//{ TENSION BATERIA
     Serial.print(" V:");
     Serial.print(voltajeBatt);                         //Print Tension
   //}*/
 
-  /*//{ Serial Print CORRIENTE BATERIA
+  /*//{ CORRIENTE BATERIA
     if ( corriente_hall > 0 ) { Serial.print( "+" ) ; }
     Serial.print(" A:");
     Serial.println ( corriente_hall, 2 ) ;    //Print Corriente
