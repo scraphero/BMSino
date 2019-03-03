@@ -9,6 +9,7 @@ const int PIN_VOLT_METER = A7;           //PIN VOLTIMETRO
 /*AMPERIMETRO SENSOR HALL*/
 const float CORRECT_VOLT_HALL = -2.50;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
 const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para sensor de 5A
+float corriente_hall = 0 ;
 
 /*VOLTIMETRO*/
 const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria le llegan 5
@@ -25,14 +26,17 @@ int long autonomia_minutos_totales = 0;
 int short autonomia_minutos = 0;
 int long autonomia_horas_totales = 0;
 
+//NEXTION
+int corriente_nextion = 0;
+
 /*MEDICION PERIODICA*/
 float Watt = 0 ;
 float voltajeBatt = 0 ;
-float corriente_hall = 0 ;
 float voltajeSensor = 0 ;
 
 /*DEBUG*/
 int valor_prueba = 0 ;
+float valor_prueba2 = -50;
 
 void end_send_nextion()
 {
@@ -79,6 +83,37 @@ void nextion_prints()
     //Serial.print(voltajeSensor);                     //Voltaje del sensor Hall
   //}
 
+  //{ CORRIENTE (consumo y recarga) | Listo
+    valor_prueba2 = valor_prueba2 + 1.05 ;
+    if ( valor_prueba2 > 50 ){ valor_prueba2 = -50 ; }
+
+    corriente_hall = valor_prueba2;
+    if (corriente_hall <= 0)
+    {
+      Serial.print( "j2.val=" );
+      Serial.print( 0 );
+      end_send_nextion();
+
+      corriente_nextion = abs(corriente_hall) * 2 ;
+      corriente_nextion = map(corriente_nextion, 0, 100, 100, 0);
+      Serial.print( "j1.val=" );
+      Serial.print( corriente_nextion );
+      end_send_nextion();
+    }
+
+    if (corriente_hall >= 0)
+    {
+      Serial.print( "j1.val=" );
+      Serial.print( 100 );
+      end_send_nextion();
+
+      corriente_nextion = corriente_hall * 2 ;
+      Serial.print( "j2.val=" );
+      Serial.print( corriente_nextion );
+      end_send_nextion();
+    }
+  //}
+
   //{ PORCENTAJE BATERIA | Listo
     Serial.print( "j0.val=" );
     Serial.print( valor_prueba );
@@ -103,18 +138,16 @@ void nextion_prints()
     Serial.print(" V:");
     Serial.print(voltajeBatt);                         //Print Tension
   //}*/
-
-  /*//{ CORRIENTE BATERIA
-    if ( corriente_hall > 0 ) { Serial.print( "+" ) ; }
-    Serial.print(" A:");
-    Serial.println ( corriente_hall, 2 ) ;    //Print Corriente
-  //}*/
-
-    tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;    //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
 }
 
 void string_print()
 {
+  //{ CORRIENTE BATERIA
+    if ( corriente_hall > 0 ) { Serial.print( "+" ) ; }
+    Serial.print(" A:");
+    Serial.println ( corriente_hall, 2 ) ;    //Print Corriente
+  //}
+
   //{ Print STRING PORCENTAJE BATERIA
     if (porcentaje_bateria < 100) { Serial.print(0); }  //para mostrar 1 cero a la izquierda en caso de que el valor sea de 2 cifras esto es necesario para mantener el string estable
     if (porcentaje_bateria < 10) { Serial.print(00); }    //para mostrar 2 ceros a la izquierda en caso de que el valor sea de 1 cifras
@@ -153,17 +186,20 @@ void string_print()
 
 
 void setup() {                            //SETUP
-  Serial.begin(9600);                   //Activar comunicacion serie
+  Serial.begin(9600);                     //Activar comunicacion serie
 }
 
 void loop()                               //LOOP
 {
   tiempo_real = (millis()/1000);          //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
 
-  if ( tiempo_medicion <= tiempo_real )   //Al final de la funcion medicion_periodica le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
-  {
+//  if ( tiempo_medicion <= tiempo_real ) //Al final de la funcion medicion_periodica le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
+//  {
     medicion_periodica();                 //Llamada a la funcion que engloba las mediciones sobre la bateria y sus calculos V, corriente_hall, W, bateria restante etc.
+    
     nextion_prints();
     //string_print();
-  }
+
+    tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;    //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
+//  }  DESCOMENTAR !!!!!!!!!!!!!!!!
 }
