@@ -115,6 +115,16 @@ void nextion_prints()
   //}
 
   //{ PORCENTAJE BATERIA | Listo
+    if ( valor_prueba < 10 ){
+      Serial.print( "j0.bco=" );
+      Serial.print( 63488 );
+      end_send_nextion();
+    }
+    else {
+      Serial.print( "j0.bco=" );
+      Serial.print( 48631 );
+      end_send_nextion();
+    }
     Serial.print( "j0.val=" );
     Serial.print( valor_prueba );
     end_send_nextion();
@@ -185,7 +195,8 @@ void string_print()
 }
 
 
-void setup() {                            //SETUP
+void setup() 
+{                            //SETUP
   Serial.begin(9600);                     //Activar comunicacion serie
 }
 
