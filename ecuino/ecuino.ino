@@ -43,51 +43,43 @@ float voltajeSensor = 0 ;
 int valor_prueba = 0 ;
 float valor_prueba2 = -50;
 
-void end_send_nextion()
-{
-  Serial.write(0xff);
-  Serial.write(0xff);
-  Serial.write(0xff);
-}
+//{  FUNCTIONS
+  void get_battery_values()
+  {
+    voltajeSensor= analogRead(PIN_AMP_METER)*(5.0 / 1023.0);                //lectura del sensor hall, medida transformada en valores de 0 a 5 para conocer el valor de tension real del output del sensor HALL
+    corriente_hall = ( voltajeSensor + CORRECT_VOLT_HALL ) * SENSIBILIDAD;  //Ecuación  para obtener la corriente a partir del valor anterior, ajuste de offset y sensibilidad, convertir la señal de voltaje output del sensor HALL en el valor de corriente real
+    voltajeBatt= analogRead(PIN_VOLT_METER)*(CORRECT_VOLT_BATT / 1023.0);   //lectura de volaje 
+    Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
+    porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
-void get_battery_values()
-{
-    voltajeSensor= analogRead(PIN_AMP_METER)*(5.0 / 1023.0);                      //lectura del sensor hall, medida transformada en valores de 0 a 5 para conocer el valor de tension real del output del sensor HALL
-    corriente_hall = ( voltajeSensor + CORRECT_VOLT_HALL ) * SENSIBILIDAD;        //Ecuación  para obtener la corriente a partir del valor anterior, ajuste de offset y sensibilidad, convertir la señal de voltaje output del sensor HALL en el valor de corriente real
-    voltajeBatt= analogRead(PIN_VOLT_METER)*(CORRECT_VOLT_BATT / 1023.0);         //lectura de volaje 
-    Watt = voltajeBatt * corriente_hall ;                                         //Potencia = V * I
-    porcentaje_bateria = (bateriaRestante / 162000)*100;                          //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
+    autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
+    autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
+    autonomia_minutos_totales = autonomia_segundos_totales / 60;            //minutos restantes totales es el valor resultante de dividir los segundos totales entre 60
+    autonomia_minutos = autonomia_minutos_totales % 60;                     //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
+    autonomia_horas_totales = autonomia_minutos_totales / 60;               //horas de autonomia es el resultado de dividir los minutos totales entre 60
 
-    autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;        //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
-    autonomia_segundos = autonomia_segundos_totales % 60;                         //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
-    autonomia_minutos_totales = autonomia_segundos_totales / 60;                  //minutos restantes totales es el valor resultante de dividir los segundos totales entre 60
-    autonomia_minutos = autonomia_minutos_totales % 60;                           //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
-    autonomia_horas_totales = autonomia_minutos_totales / 60;                     //horas de autonomia es el resultado de dividir los minutos totales entre 60
+    pile_current = pile_current + corriente_hall ;    
 
-    //{ Sobre estas variables se van acumulando los datos antes calculados
-      pile_current = pile_current + corriente_hall ;
-    //}
+    get_battery_values_loop = get_battery_values_loop + 1 ;                 //cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_values 
 
-    get_battery_values_loop = get_battery_values_loop + 1 ;                       //cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_values 
-
-    if ( tiempo_medicion <= tiempo_real ) //Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
+    if ( tiempo_medicion <= tiempo_real )                                   //Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
     {
       average_battery_values();
-      tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;    //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
+      tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;                  //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
     }
-}
+  }
 
-void average_battery_values()
-{
+  void average_battery_values()
+  {
   average_current = pile_current / get_battery_values_loop ;  //Calcula la corriente media 
   bateriaRestante = bateriaRestante - average_current;        //Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
 
-  pile_current = 0 ;                                  //Resetea la variable donde se acumulan los valores de corriente
+  pile_current = 0 ;                                          //Resetea la variable donde se acumulan los valores de corriente
   get_battery_values_loop = 0 ;
-}
+  }
 
-void nextion_prints()
-{
+  void nextion_prints()
+  {
   //{ Prints DEBUG
     //Serial.print("tiempo real:");
     //Serial.print(tiempo_real);
@@ -172,10 +164,17 @@ void nextion_prints()
     Serial.print(" V:");
     Serial.print(voltajeBatt);                         //Print Tension
   //}*/
-}
+  }
 
-void string_print()
-{
+  void end_send_nextion()
+  {
+  Serial.write(0xff);
+  Serial.write(0xff);
+  Serial.write(0xff);
+  }
+
+  void string_print()
+  {
   //{ CORRIENTE BATERIA
     if ( corriente_hall > 0 ) { Serial.print( "+" ) ; }
     Serial.print(" A:");
@@ -216,20 +215,20 @@ void string_print()
     if ( Watt < 10 ) { Serial.print("000"); }                        //para mostrar 3 ceros a la izquierda en caso de que el valor sea de 1 cifras
     Serial.println( Watt );                                            //Print Potencia
   //}
-}
-
+  }
+//}
 
 void setup() 
-{                                         //SETUP
-  Serial.begin(9600);                     //Se activa comunicacion serie
+{                                 //SETUP
+  Serial.begin(9600);             //Se activa comunicacion serie
 }
 
-void loop()                               //LOOP
+void loop()                       //LOOP
 {
-  get_battery_values();                 //Llamada a la funcion que engloba las mediciones sobre la bateria y sus calculos V, corriente_hall, W, bateria restante etc.
+  get_battery_values();           //Llamada a la funcion que engloba las mediciones sobre la bateria y sus calculos V, corriente_hall, W, bateria restante etc.
   nextion_prints();
 
 
-  tiempo_real = (millis()/1000);          //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
+  tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   
 }
