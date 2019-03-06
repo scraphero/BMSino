@@ -14,19 +14,25 @@ int       rpm = 0 ;
 int       kmh = 0 ;
 
 
-void tachometer()  // tachometer_count | masuring_time | pulse_x_second | rpm | kmh
+void tachometer()  // tachometer_count | measuring_time | pulse_x_second | rpm | kmh
 {
 	tachometer_count = tachometer_count + 1 ;
-
+	Serial.print(tachometer_count);
 	if( tachometer_count >= PULSE_LIMIT )
 	{
 		new_time       = millis();
 		measuring_time = new_time - last_time ;
-		pulse_x_second = ( measuring_time / tachometer_count ) / 1000 ;
+		pulse_x_second = tachometer_count / (measuring_time / 1000) ;
 		rpm            = ( pulse_x_second / PULSES_X_SPIN ) * 60 ;
 		kmh            = rpm * WHEEL_DISTANCE * 60 ;
-
-		Serial.println(tachometer_count);
+		
+		Serial.print(" ");
+		Serial.print(tachometer_count);
+		Serial.print("np ");
+		Serial.print( measuring_time );
+		Serial.print("t ");
+		Serial.print( pulse_x_second );
+		Serial.println("Hz");
 
 		tachometer_count = 0 ;
 		last_time = new_time;
@@ -38,11 +44,13 @@ void setup()
 	Serial.begin(9600);
 	pinMode(12, OUTPUT);
 	pinMode(TACHOMETER_PIN, INPUT);
-	digitalWrite(12, HIGH);
 	attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer, RISING);
 }
 
 void loop()
 {
-	delay(500);
+	digitalWrite(12, HIGH);
+	delay(100);
+	digitalWrite(12, LOW);
+	delay(100);
 }
