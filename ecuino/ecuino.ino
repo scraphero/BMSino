@@ -34,14 +34,13 @@ float average_current = 0 ;
 //NEXTION
 int corriente_nextion = 0;
 
-/*get_battery_values*/
+//get_battery_values
 float Watt = 0 ;
 float voltajeBatt = 0 ;
 float voltajeSensor = 0 ;
 
-/*DEBUG*/
-int valor_prueba = 0 ;
-float valor_prueba2 = -50;
+// DEMO_VALUES
+int demo_50_50 = 0 ;
 
 //{  FUNCTIONS
   void get_battery_values()
@@ -52,20 +51,29 @@ float valor_prueba2 = -50;
     Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
     porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
+    //corriente_hall = demo_50_50 ;
+
     autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
     autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
     autonomia_minutos_totales = autonomia_segundos_totales / 60;            //minutos restantes totales es el valor resultante de dividir los segundos totales entre 60
     autonomia_minutos = autonomia_minutos_totales % 60;                     //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
     autonomia_horas_totales = autonomia_minutos_totales / 60;               //horas de autonomia es el resultado de dividir los minutos totales entre 60
 
+    if ( autonomia_horas_totales > 999 )                        // En caso de que el tiempo de autonomia sea excesivo le ponemos este limite ya desfiguraria los datos en la pantalla nextion
+    {
+      autonomia_horas_totales = 999 ;
+      autonomia_minutos = 59 ;
+      autonomia_segundos = 59 ;
+    }
+
     pile_current = pile_current + corriente_hall ;    
 
-    get_battery_values_loop = get_battery_values_loop + 1 ;                 //cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_values 
+    get_battery_values_loop = get_battery_values_loop + 1 ;     //cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_values 
 
-    if ( tiempo_medicion <= tiempo_real )                                   //Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
+    if ( tiempo_medicion <= tiempo_real )                       //Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
     {
       average_battery_values();
-      tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;                  //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
+      tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;      //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
     }
   }
 
@@ -80,28 +88,7 @@ float valor_prueba2 = -50;
 
   void nextion_prints()
   {
-    //{ Prints DEBUG
-      //Serial.print("tiempo real:");
-      //Serial.print(tiempo_real);
-      //Serial.print("    tiempo medicion");
-      //Serial.print(tiempo_medicion);
-      //Serial.print("    bateria restante:");
-      //Serial.print(bateriaRestante);
-      //Serial.print("    ");
-
-      //Serial.print("Au: ");
-      //Serial.print(autonomia_segundos_totales);        //Serial print autonomia en segundos totales
-      //Serial.print("s left    ");
-      
-      //Serial.print("    Voltaje sensor: ");
-      //Serial.print(voltajeSensor);                     //Voltaje del sensor Hall
-    //}
-
     //{ CORRIENTE (consumo y recarga) | Listo
-      //valor_prueba2 = valor_prueba2 + 1.05 ;
-      //if ( valor_prueba2 > 50 ){ valor_prueba2 = -50 ; }
-
-      //corriente_hall = valor_prueba2;
       if (corriente_hall <= 0)
       {
         Serial.print( "j2.val=" );
@@ -129,8 +116,6 @@ float valor_prueba2 = -50;
     //}
 
     //{ PORCENTAJE BATERIA | Listo
-      valor_prueba = 80 ;
-      porcentaje_bateria = valor_prueba;
       if ( porcentaje_bateria > 100 ){ porcentaje_bateria = 0 ; }
       if ( porcentaje_bateria < 10 ){
         Serial.print( "j0.bco=" );
@@ -147,19 +132,22 @@ float valor_prueba2 = -50;
       end_send_nextion();
     //}
 
-    /*//{ AUTONOMIA h/m/s
-      Serial.print( "" );
-      Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
+    //{ AUTONOMIA h/m/s
+      Serial.print( "t0.txt=" );
+      Serial.print( abs( 23 ) ) ;  //Horas restantes de autonomia
+      Serial.print( "h" );
       end_send_nextion();
 
-      Serial.print( "" );
+      Serial.print( "t1.txt=" );
       Serial.print( abs( autonomia_minutos ) );        //Minutos restantes de autonomia
+      Serial.print( "m" );
       end_send_nextion();
 
-      Serial.print( "" );
+      Serial.print( "t2.txt=" );
       Serial.print( abs( autonomia_segundos ) );        //Segundos restantes de autonomia
+      Serial.print( "s" );
       end_send_nextion();
-    //}*/
+    //}
 
     /*//{ TENSION BATERIA
       Serial.print(" V:");
@@ -231,10 +219,19 @@ void setup()
 void loop()                       //LOOP
 {
 
+  demo_values();
   get_battery_values();           //
   nextion_prints();
 
 
   tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   
+}
+
+void demo_values()
+{
+  demo_50_50 = demo_50_50 + 1 ;
+  if (demo_50_50 > 50){
+    demo_50_50 = -50 ;
+  }
 }
