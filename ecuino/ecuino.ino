@@ -98,10 +98,10 @@ float valor_prueba2 = -50;
     //}
 
     //{ CORRIENTE (consumo y recarga) | Listo
-      valor_prueba2 = valor_prueba2 + 1.05 ;
-      if ( valor_prueba2 > 50 ){ valor_prueba2 = -50 ; }
+      //valor_prueba2 = valor_prueba2 + 1.05 ;
+      //if ( valor_prueba2 > 50 ){ valor_prueba2 = -50 ; }
 
-      corriente_hall = valor_prueba2;
+      //corriente_hall = valor_prueba2;
       if (corriente_hall <= 0)
       {
         Serial.print( "j2.val=" );
@@ -129,9 +129,10 @@ float valor_prueba2 = -50;
     //}
 
     //{ PORCENTAJE BATERIA | Listo
-      valor_prueba = valor_prueba + 1 ;
-      if ( valor_prueba > 100 ){ valor_prueba = 0 ; }
-      if ( valor_prueba < 10 ){
+      valor_prueba = 80 ;
+      porcentaje_bateria = valor_prueba;
+      if ( porcentaje_bateria > 100 ){ porcentaje_bateria = 0 ; }
+      if ( porcentaje_bateria < 10 ){
         Serial.print( "j0.bco=" );
         Serial.print( 63488 );
         end_send_nextion();
@@ -142,7 +143,7 @@ float valor_prueba2 = -50;
         end_send_nextion();
       }
       Serial.print( "j0.val=" );
-      Serial.print( valor_prueba );
+      Serial.print( porcentaje_bateria );
       end_send_nextion();
     //}
 
@@ -221,6 +222,10 @@ float valor_prueba2 = -50;
 void setup() 
 {                                 //SETUP
   Serial.begin(9600);             //Se activa comunicacion serie
+  pinMode(5,OUTPUT);
+  pinMode(6, OUTPUT);
+  digitalWrite(5, HIGH);
+  digitalWrite(6, LOW);
 }
 
 void loop()                       //LOOP
