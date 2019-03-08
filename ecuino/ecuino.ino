@@ -2,19 +2,19 @@
 
 int tiempo_real;
 
-/*PINES*/
+// PINES
 const int PIN_AMP_METER = A0;            //PIN AMPERIMETRO
 const int PIN_VOLT_METER = A7;           //PIN VOLTIMETRO
 
-/*AMPERIMETRO SENSOR HALL*/
+// AMPERIMETRO SENSOR HALL
 const float CORRECT_VOLT_HALL = -2.50;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
 const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para sensor de 50A
 float corriente_hall = 0 ;
 
-/*VOLTIMETRO*/
+// VOLTIMETRO
 const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria le llegan 5
 
-/*BATERIA*/
+// BATERIA
 const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
 float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
 int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
@@ -31,10 +31,10 @@ int get_battery_values_loop = 0 ;
 float pile_current = 0 ;
 float average_current = 0 ;
 
-//NEXTION
+// NEXTION
 int corriente_nextion = 0;
 
-//get_battery_values
+// get_battery_values
 float Watt = 0 ;
 float voltajeBatt = 0 ;
 float voltajeSensor = 0 ;
@@ -51,7 +51,7 @@ int demo_50_50 = 0 ;
     Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
     porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
-    //corriente_hall = demo_50_50 ;
+    corriente_hall = demo_50_50 ;
 
     autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
     autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
@@ -134,18 +134,24 @@ int demo_50_50 = 0 ;
 
     //{ AUTONOMIA h/m/s
       Serial.print( "t0.txt=" );
-      Serial.print( abs( 23 ) ) ;  //Horas restantes de autonomia
+      Serial.print("\"");
+      Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
       Serial.print( "h" );
+      Serial.print("\"");
       end_send_nextion();
 
       Serial.print( "t1.txt=" );
+      Serial.print("\"");
       Serial.print( abs( autonomia_minutos ) );        //Minutos restantes de autonomia
       Serial.print( "m" );
+      Serial.print("\"");
       end_send_nextion();
 
       Serial.print( "t2.txt=" );
+      Serial.print("\"");
       Serial.print( abs( autonomia_segundos ) );        //Segundos restantes de autonomia
       Serial.print( "s" );
+      Serial.print("\"");
       end_send_nextion();
     //}
 
@@ -162,7 +168,7 @@ int demo_50_50 = 0 ;
     Serial.write(0xff);
   }
 
-  void string_print()
+  /*void string_print()
   {
     //{ CORRIENTE BATERIA
       if ( corriente_hall > 0 ) { Serial.print( "+" ) ; }
@@ -204,7 +210,7 @@ int demo_50_50 = 0 ;
       if ( Watt < 10 ) { Serial.print("000"); }                        //para mostrar 3 ceros a la izquierda en caso de que el valor sea de 1 cifras
       Serial.println( Watt );                                            //Print Potencia
     //}
-  }
+  }*/
 //}
 
 void setup() 
@@ -222,7 +228,6 @@ void loop()                       //LOOP
   demo_values();
   get_battery_values();           //
   nextion_prints();
-
 
   tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   
