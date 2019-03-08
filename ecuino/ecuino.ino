@@ -41,6 +41,7 @@ float voltajeSensor = 0 ;
 
 // DEMO_VALUES
 int demo_50_50 = 0 ;
+int demo_0_50 = 0 ;
 
 //{  FUNCTIONS
   void get_battery_values()
@@ -51,7 +52,7 @@ int demo_50_50 = 0 ;
     Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
     porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
-    corriente_hall = demo_50_50 ;
+    corriente_hall = demo_0_50 ;
 
     autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
     autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
@@ -59,7 +60,7 @@ int demo_50_50 = 0 ;
     autonomia_minutos = autonomia_minutos_totales % 60;                     //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
     autonomia_horas_totales = autonomia_minutos_totales / 60;               //horas de autonomia es el resultado de dividir los minutos totales entre 60
 
-    if ( autonomia_horas_totales > 999 )                        // En caso de que el tiempo de autonomia sea excesivo le ponemos este limite ya desfiguraria los datos en la pantalla nextion
+    if ( abs(autonomia_horas_totales) > 999 )                        // En caso de que el tiempo de autonomia sea excesivo le ponemos este limite ya desfiguraria los datos en la pantalla nextion
     {
       autonomia_horas_totales = 999 ;
       autonomia_minutos = 59 ;
@@ -133,26 +134,50 @@ int demo_50_50 = 0 ;
     //}
 
     //{ AUTONOMIA h/m/s
-      Serial.print( "t0.txt=" );
-      Serial.print("\"");
-      Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
-      Serial.print( "h" );
-      Serial.print("\"");
-      end_send_nextion();
+      if (corriente_hall < 0){
+        Serial.print( "t0.txt=" );
+        Serial.print("\"");
+        Serial.print( "-" ) ;  //Horas restantes de autonomia
+        Serial.print( "h" );
+        Serial.print("\"");
+        end_send_nextion();
 
-      Serial.print( "t1.txt=" );
-      Serial.print("\"");
-      Serial.print( abs( autonomia_minutos ) );        //Minutos restantes de autonomia
-      Serial.print( "m" );
-      Serial.print("\"");
-      end_send_nextion();
+        Serial.print( "t1.txt=" );
+        Serial.print("\"");
+        Serial.print( "-" );        //Minutos restantes de autonomia
+        Serial.print( "m" );
+        Serial.print("\"");
+        end_send_nextion();
 
-      Serial.print( "t2.txt=" );
-      Serial.print("\"");
-      Serial.print( abs( autonomia_segundos ) );        //Segundos restantes de autonomia
-      Serial.print( "s" );
-      Serial.print("\"");
-      end_send_nextion();
+        Serial.print( "t2.txt=" );
+        Serial.print("\"");
+        Serial.print( "-" );        //Segundos restantes de autonomia
+        Serial.print( "s" );
+        Serial.print("\"");
+        end_send_nextion();
+      }
+      else{
+        Serial.print( "t0.txt=" );
+        Serial.print("\"");
+        Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
+        Serial.print( "h" );
+        Serial.print("\"");
+        end_send_nextion();
+
+        Serial.print( "t1.txt=" );
+        Serial.print("\"");
+        Serial.print( abs( autonomia_minutos ) );        //Minutos restantes de autonomia
+        Serial.print( "m" );
+        Serial.print("\"");
+        end_send_nextion();
+
+        Serial.print( "t2.txt=" );
+        Serial.print("\"");
+        Serial.print( abs( autonomia_segundos ) );        //Segundos restantes de autonomia
+        Serial.print( "s" );
+        Serial.print("\"");
+        end_send_nextion();
+      }
     //}
 
     /*//{ TENSION BATERIA
@@ -238,5 +263,10 @@ void demo_values()
   demo_50_50 = demo_50_50 + 1 ;
   if (demo_50_50 > 50){
     demo_50_50 = -50 ;
+  }
+
+  demo_0_50 = demo_0_50 + 1 ;
+  if (demo_0_50 > 50){
+    demo_0_50 = 0 ;
   }
 }
