@@ -52,7 +52,9 @@ int demo_0_50 = 0 ;
     Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
     porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
-    corriente_hall = demo_50_50 ;
+
+    //corriente_hall = 45 ;
+
 
     autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
     autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60

@@ -51,7 +51,7 @@ void loop()
   tiempo_medicion_sec = tiempo_medicion / 1000;
   pulsos_x_segundo = (contador-1) / tiempo_medicion_sec;       //ecuacion pulsos x segundo
   rpm = pulsos_x_segundo / PULSOS_POR_VUELTA * 60;             //ecuacion para conseguir las rpm
- 	velocidad_kmh = rpm * PERIMETRO_RUEDA * 60;                      //velocidad_kmh en km/h
+ 	velocidad_kmh = rpm * PERIMETRO_RUEDA * 60;                  //velocidad_kmh en km/h
 
   //Serial.print("tm ");Serial.print(tiempo_medicion);Serial.print("   tr ");Serial.print(tiempo_real); Serial.print("   ta ");Serial.print(tiempo_anterior);
   //Serial.print("   cont ");Serial.print(contador-1);Serial.print("   tms ");Serial.print(tiempo_medicion_sec,3);
