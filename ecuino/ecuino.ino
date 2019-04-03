@@ -1,4 +1,4 @@
-//v0.1 Esta version añade la funcion de calcular la autonomia_segundos_totales en tiempo restante de bateria
+//Suport by Pablo Hernandez | @scraphero on github
 
 int tiempo_real;
 
@@ -8,7 +8,6 @@ int tiempo_real;
   int short TACHOMETER_PIN = 2 ;           //PIN for TACHOMETER  //}
 
 //{ TACHOMETER CONST & variables
-  int short TACHOMETER_PIN = 2 ;    // Pin for tachometer
   int short PULSE_LIMIT = 4 ;       // Define how many pulses are needed until calcs
   int short PULSES_X_SPIN = 1 ;     // Define how much pulses we get per wheel spin
   int       WHEEL_DISTANCE = 1500 ; // Define the wheel spin straight travel
@@ -29,22 +28,22 @@ int tiempo_real;
 //{ VOLTIMETRO
   const float CORRECT_VOLT_BATT = 49.8;  //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria le llegan 5
 
-// BATERIA
-const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
-float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
-int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
-const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
-int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
-int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
-int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
-int long autonomia_minutos_totales = 0;  
-int short autonomia_minutos = 0;
-int long autonomia_horas_totales = 0;
+//{ BATERIA
+  const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
+  float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
+  int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
+  const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
+  int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
+  int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
+  int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
+  int long autonomia_minutos_totales = 0;  
+  int short autonomia_minutos = 0;
+  int long autonomia_horas_totales = 0;  //}
 
-// Battery average
-int get_battery_values_loop = 0 ;
-float pile_current = 0 ;
-float average_current = 0 ;
+//{ Battery average
+  int get_battery_values_loop = 0 ;
+  float pile_current = 0 ;
+  float average_current = 0 ;  //}
 
 // NEXTION
 int corriente_nextion = 0;
@@ -63,22 +62,27 @@ int demo_0_50 = 0 ;
   void tachometer()  // tachometer_count | measuring_time | pulse_x_second | rpm | kmh
   {
     tachometer_count = tachometer_count + 1 ;
-    Serial.print(tachometer_count);
+    //Serial.print(tachometer_count);          //Debug
     if( tachometer_count >= PULSE_LIMIT )
     {
       new_time       = millis();
       measuring_time = new_time - last_time ;
-      pulse_x_second = tachometer_count / (measuring_time / 1000) ;
+      //pulse_x_second = tachometer_count / measuring_time ;
+      pulse_x_second = tachometer_count % measuring_time ;
       rpm            = ( pulse_x_second / PULSES_X_SPIN ) * 60 ;
       kmh            = rpm * WHEEL_DISTANCE * 60 ;
       
-      Serial.print(" ");
+      //Serial.print(" ");
       Serial.print(tachometer_count);
-      Serial.print("np ");
+      Serial.print("tc  ");
       Serial.print( measuring_time );
-      Serial.print("t ");
+      Serial.print("mt  ");
       Serial.print( pulse_x_second );
-      Serial.println("Hz");
+      Serial.print("pps  ");
+      Serial.print(rpm);
+      Serial.print("rpm  ");
+      Serial.print(kmh);
+      Serial.println("kmh  ");
 
       tachometer_count = 0 ;
       last_time = new_time;
@@ -300,7 +304,7 @@ void loop()                       //LOOP
 
   demo_values();
   get_battery_values(); 
-  nextion_prints();
+  //nextion_prints();
 
   tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   
