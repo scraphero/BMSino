@@ -8,17 +8,19 @@ int tiempo_real;
   int short TACHOMETER_PIN = 2 ;           //PIN for TACHOMETER  //}
 
 //{ TACHOMETER CONST & variables
-  int short PULSE_LIMIT = 4 ;       // Define how many pulses are needed until calcs
-  int short PULSES_X_SPIN = 1 ;     // Define how much pulses we get per wheel spin
-  int       WHEEL_DISTANCE = 1500 ; // Define the wheel spin straight travel
+  int short PULSE_LIMIT    = 4 ;    // Define how many pulses are needed until calcs
+  int short PULSES_X_SPIN  = 1 ;    // Define how much pulses we get per wheel spin
+  float     WHEEL_DISTANCE = 1.5 ; // Define the wheel spin straight travel
 
-  int short tachometer_count = 0 ; 
-  int       new_time = 0 ;
-  int       last_time = 0 ;
-  int       measuring_time = 0 ;
-  float     pulse_x_second = 0 ;
-  int       rpm = 0 ;
-  int       kmh = 0 ;  //}
+  int short tachometer_count  = 0 ; 
+  int       new_time          = 0 ;
+  int       last_time         = 0 ;
+  int       measuring_time_ms = 0 ;
+  float     measuring_time_s  = 0 ;
+  float     pulse_x_second    = 0 ;
+  float     tach_period       = 0 ;
+  int       rpm               = 0 ;
+  int       kmh               = 0 ;  //}
 
 //{ AMPERIMETRO SENSOR HALL
   const float CORRECT_VOLT_HALL = -2.50;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
@@ -59,24 +61,30 @@ int demo_0_50 = 0 ;
 
 //{  FUNCTIONS
 
-  void tachometer()  // tachometer_count | measuring_time | pulse_x_second | rpm | kmh
+  void tachometer()  // tachometer_count | measuring_time_ms | pulse_x_second | rpm | kmh
   {
     tachometer_count = tachometer_count + 1 ;
     //Serial.print(tachometer_count);          //Debug
     if( tachometer_count >= PULSE_LIMIT )
     {
-      new_time       = millis();
-      measuring_time = new_time - last_time ;
-      //pulse_x_second = tachometer_count / measuring_time ;
-      pulse_x_second = tachometer_count % measuring_time ;
-      rpm            = ( pulse_x_second / PULSES_X_SPIN ) * 60 ;
-      kmh            = rpm * WHEEL_DISTANCE * 60 ;
+      new_time          = millis();
+      measuring_time_ms = new_time - last_time ;
+      measuring_time_s  = (float)measuring_time_ms / 1000 ;
+      tach_period       = measuring_time_s / (float)tachometer_count ;
+      pulse_x_second    = 1 / tach_period ;
+      //pulse_x_second    = tachometer_count % measuring_time_ms ;
+      rpm               = ( pulse_x_second / (float)PULSES_X_SPIN ) * 60 ;
+      kmh               = rpm * (WHEEL_DISTANCE/1000) * 60 ;
       
       //Serial.print(" ");
       Serial.print(tachometer_count);
       Serial.print("tc  ");
-      Serial.print( measuring_time );
-      Serial.print("mt  ");
+      Serial.print( measuring_time_ms );
+      Serial.print("ms  ");
+      Serial.print( measuring_time_s, 3 );
+      Serial.print("s  ");
+      Serial.print( tach_period, 5 );
+      Serial.print("tp  ");
       Serial.print( pulse_x_second );
       Serial.print("pps  ");
       Serial.print(rpm);
@@ -309,7 +317,9 @@ void loop()                       //LOOP
   tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   
   digitalWrite(12, LOW);          //Generar pulsos para probar la funcion tachometer con interrupciones, comentar o eliminar estas lineas.
+  delay(1000);
   digitalWrite(12, HIGH);
+
 }
 
 void demo_values()
