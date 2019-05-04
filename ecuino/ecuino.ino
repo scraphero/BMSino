@@ -1,4 +1,4 @@
-//v0.1 Esta version añade la funcion de calcular la autonomia_segundos_totales en tiempo restante de bateria
+//Suport by Pablo Hernandez | @scraphero on github
 
 int tiempo_real;
 
@@ -12,7 +12,7 @@ const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para 
 float corriente_hall = 0 ;
 
 // VOLTIMETRO
-const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria le llegan 5
+const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria medimos 5
 
 //{ BATERIA CONSTANTES y variables
   const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
@@ -24,13 +24,12 @@ const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 5
   int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
   int long autonomia_minutos_totales = 0;  
   int short autonomia_minutos = 0;
-  int long autonomia_horas_totales = 0;
-//}
+  int long autonomia_horas_totales = 0;  //}
 
-// Battery average
-int get_battery_values_loop = 0 ;
-float pile_current = 0 ;
-float average_current = 0 ;
+//{ Battery average
+  int get_battery_values_loop = 0 ;
+  float pile_current = 0 ;
+  float average_current = 0 ;  //}
 
 // NEXTION
 int corriente_nextion = 0;
@@ -45,6 +44,44 @@ int demo_50_50 = 0 ;
 int demo_0_50 = 0 ;
 
 //{  FUNCTIONS
+
+  void tachometer()  // tachometer_count | measuring_time_ms | pulse_x_second | rpm | kmh
+  {
+    Serial.print("tachometer");
+    tachometer_count = tachometer_count + 1 ;
+    //Serial.print(tachometer_count);          //Debug
+    if( tachometer_count >= PULSE_LIMIT )
+    {
+      new_time          = millis();
+      measuring_time_ms = new_time - last_time ;
+      measuring_time_s  = (float)measuring_time_ms / 1000 ;
+      tach_period       = measuring_time_s / (float)tachometer_count ;
+      pulse_x_second    = 1 / tach_period ;
+      //pulse_x_second    = tachometer_count % measuring_time_ms ;
+      rpm               = ( pulse_x_second / (float)PULSES_X_SPIN ) * 60 ;
+      kmh               = rpm * (WHEEL_DISTANCE/1000) * 60 ;
+      
+      //Serial.print(" ");
+      Serial.print(tachometer_count);
+      Serial.print("tc  ");
+      Serial.print( measuring_time_ms );
+      Serial.print("ms  ");
+      Serial.print( measuring_time_s, 3 );
+      Serial.print("s  ");
+      Serial.print( tach_period, 5 );
+      Serial.print("tp  ");
+      Serial.print( pulse_x_second );
+      Serial.print("pps  ");
+      Serial.print(rpm);
+      Serial.print("rpm  ");
+      Serial.print(kmh);
+      Serial.println("kmh  ");
+
+      tachometer_count = 0 ;
+      last_time = new_time;
+    }
+  }
+
   void get_battery_values()
   {
     voltajeSensor= analogRead(PIN_AMP_METER)*(5.0 / 1023.0);                //lectura del sensor hall, medida transformada en valores de 0 a 5 para conocer el valor de tension real del output del sensor HALL
@@ -241,24 +278,38 @@ int demo_0_50 = 0 ;
   }*/
 //}
 
-void setup() 
-{                                 //SETUP
+void setup()                      //SETUP 
+{
   Serial.begin(9600);             //Se activa comunicacion serie
-  pinMode(5,OUTPUT);
-  pinMode(6, OUTPUT);
-  digitalWrite(5, HIGH);
-  digitalWrite(6, LOW);
+  //Serial.print("setup");          //Debug
+
+  pinMode(TACHOMETER_PIN, INPUT);
+  attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer, RISING); //interrupcion que llama a la funcion tachometer cuando se detecta un flanco ascendente por el pin TACHOMETER_PIN
+  pinMode(12, OUTPUT);                                                         //Pin para generar impulsos, puentear con TACHOMETER_PIN para realizar pruebas, comentar esta linea cuando se este utilizando una entrada real
+
+  //pinMode(4, OUTPUT);             //Constant 5V
+  //digitalWrite(4, HIGH);          //Constant 5V
+
+  pinMode(2,OUTPUT);              //Constant 5V
+  digitalWrite(2, HIGH);          //Constant 5V
+
+  pinMode(4, OUTPUT);             //Constant GND
+  digitalWrite(4, LOW);           //Constant GND
 }
 
 void loop()                       //LOOP
 {
-
+  //Serial.print("loop");           //Debug
   demo_values();
-  get_battery_values();           //
-  nextion_prints();
+  get_battery_values(); 
+  //nextion_prints();
 
   tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   
+  digitalWrite(12, LOW);          //Generar pulsos para probar la funcion tachometer con interrupciones, comentar o eliminar estas lineas.
+  delay(100);
+  digitalWrite(12, HIGH);
+  delay(50);
 }
 
 void demo_values()
