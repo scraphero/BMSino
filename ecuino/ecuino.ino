@@ -14,17 +14,18 @@ float corriente_hall = 0 ;
 // VOLTIMETRO
 const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria le llegan 5
 
-// BATERIA
-const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
-float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
-int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
-const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
-int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
-int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
-int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
-int long autonomia_minutos_totales = 0;  
-int short autonomia_minutos = 0;
-int long autonomia_horas_totales = 0;
+//{ BATERIA CONSTANTES y variables
+  const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
+  float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
+  int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
+  const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
+  int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
+  int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
+  int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
+  int long autonomia_minutos_totales = 0;  
+  int short autonomia_minutos = 0;
+  int long autonomia_horas_totales = 0;
+//}
 
 // Battery average
 int get_battery_values_loop = 0 ;
@@ -53,7 +54,7 @@ int demo_0_50 = 0 ;
     porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
 
-    //corriente_hall = 45 ;
+    corriente_hall = demo_50_50 ;                                           //DEBUG
 
 
     autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
