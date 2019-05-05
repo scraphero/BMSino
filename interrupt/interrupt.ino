@@ -20,6 +20,7 @@
 // TACHOMETER FUNCTION {
 	void tachometer()  // tachometer_count | measuring_time | pulse_x_second | rpm | kmh
 	{
+		
 		tachometer_count = tachometer_count + 1 ;
 		if( tachometer_count >= PULSE_LIMIT )
 		{
@@ -28,8 +29,8 @@
 			pulse_x_second = tachometer_count / (measuring_time / 1000) ;
 			rpm            = ( pulse_x_second / PULSES_X_SPIN ) * 60 ;
 			kmh            = rpm * WHEEL_DISTANCE * 60 ;
-		
-			tachometer_count = 0 ;
+						
+			//tachometer_count = 0 ;
 			last_time = new_time;
 		}
 	}
@@ -72,34 +73,32 @@
 			if (bit_p_i == 32) { digitalWrite(parallel_pin_32, HIGH); }
 			else { digitalWrite(parallel_pin_32, LOW); }  //}
 	}
-
-void setup()
-{
-	Serial.begin(9600);
-	// PARALLEL COMMUNICATION {
-		pinMode(parallel_pin_1,  OUTPUT);
-		pinMode(parallel_pin_2,  OUTPUT);
-		pinMode(parallel_pin_4,  OUTPUT);
-		pinMode(parallel_pin_8,  OUTPUT);
-		pinMode(parallel_pin_16, OUTPUT);
-		pinMode(parallel_pin_32, OUTPUT); //}
-	// TACHOMETER {
-		pinMode        ( TACHOMETER_GND_PIN, OUTPUT );
-		digitalWrite   ( TACHOMETER_GND_PIN, LOW );
-		digitalWrite   ( TACHOMETER_PIN    , HIGH );
-		pinMode        ( TACHOMETER_PIN    , INPUT );
-		//attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer, RISING);  //}
-}
+// SETUP {
+	void setup(){
+		
+		Serial.begin(9600);
+		
+		// PARALLEL COMMUNICATION {
+			pinMode(parallel_pin_1,  OUTPUT);
+			pinMode(parallel_pin_2,  OUTPUT);
+			pinMode(parallel_pin_4,  OUTPUT);
+			pinMode(parallel_pin_8,  OUTPUT);
+			pinMode(parallel_pin_16, OUTPUT);
+			pinMode(parallel_pin_32, OUTPUT); //}
+		// TACHOMETER {
+			pinMode        ( TACHOMETER_GND_PIN, OUTPUT );
+			digitalWrite   ( TACHOMETER_GND_PIN, LOW );
+			digitalWrite   ( TACHOMETER_PIN    , HIGH );
+			//pinMode        ( TACHOMETER_PIN    , INPUT );
+			attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer, RISING);  //}
+	}
 
 void loop()
-{
-	//parallel_send_speed();
-	
-	kmh = kmh + 1 ;          //DEBUG
-  if (kmh > 50){kmh = 0;}  //DEBUG
-  
-  Serial.println(kmh);
-	parallel_inproved();
+{	
+	//kmh = kmh + 1 ;          //DEBUG
+  //if (kmh > 50){kmh = 0;}  //DEBUG
+  Serial.println(tachometer_count);     //DEBUG
+	//delay(300);              //DEBUG
 
-	delay(300);
+	parallel_inproved();
 }
