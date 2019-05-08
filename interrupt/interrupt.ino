@@ -6,7 +6,7 @@
 	int short TACHOMETER_PIN     = 3 ;    // Pin for tachometer
 	int short TACHOMETER_GND_PIN = 4 ;    // Pin for tachometer gnd
 // TACHOMETER CONSTANTS {
-	int short PULSE_LIMIT        = 1 ;    // Define how many pulses are needed until calcs
+	int short PULSE_LIMIT        = 2 ;    // Define how many pulses are needed until calcs
 	int short PULSES_X_SPIN      = 1 ;    // Define how much pulses we get per wheel spin
 	float       WHEEL_DISTANCE   = 0.0015  ; // Define the wheel spin straight travel
 // TACHOMETER VARIABLES {
