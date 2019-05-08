@@ -3,236 +3,234 @@
 int tiempo_real;
 
 // PINES
-const int PIN_AMP_METER = A0;            //PIN AMPERIMETRO
-const int PIN_VOLT_METER = A7;           //PIN VOLTIMETRO
+  // BATTERY
+    const int PIN_AMP_METER = A0;  // AMP METER
+    const int PIN_VOLT_METER = A7; // VOLT METER
+  // TACHOMETER
+    int short TACHOMETER_PIN     = 3 ;    // Pin for tachometer
+    int short TACHOMETER_GND_PIN = 4 ;    // Pin for tachometer gnd [NOT NECESSARY BUT FOR LOCATION CONVENIENCE]
 
-// AMPERIMETRO SENSOR HALL
-const float CORRECT_VOLT_HALL = -2.50;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
-const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para sensor de 50A
-float corriente_hall = 0 ;
+// DEMO VALUES
+  // Variables
+    int demo_50_50 = 0 ;
+    int demo_0_50 = 0 ;
+  // Function
+    void demo_values()
+    {
+      demo_50_50 = demo_50_50 + 1 ;
+      if (demo_50_50 > 50){
+        demo_50_50 = -50 ;
+      }
 
-// VOLTIMETRO
-const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria medimos 5
+      demo_0_50 = demo_0_50 + 1 ;
+      if (demo_0_50 > 50){
+        demo_0_50 = 0 ;
+      }
+    }
 
-//{ BATERIA CONSTANTES y variables
-  const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
-  float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
-  int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
-  const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
-  int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
-  int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
-  int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
-  int long autonomia_minutos_totales = 0;  
-  int short autonomia_minutos = 0;
-  int long autonomia_horas_totales = 0;  //}
+// BATTERY
+  // Variables y Constantes
+    const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
+    const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
+    
+    // Voltimetro
+    const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria medimos 5
 
-//{ Battery average
-  int get_battery_values_loop = 0 ;
-  float pile_current = 0 ;
-  float average_current = 0 ;  //}
+    // AMPERIMETRO SENSOR HALL
+    const float CORRECT_VOLT_HALL = -2.50;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
+    const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para sensor de 50A
+    float corriente_hall = 0 ;
+
+    float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
+    int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
+  
+    int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
+    int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
+    int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
+    int long autonomia_minutos_totales = 0;  
+    int short autonomia_minutos = 0;
+    int long autonomia_horas_totales = 0;
+
+    float Watt = 0 ;
+    float voltajeBatt = 0 ;
+    float voltajeSensor = 0 ;
+    int get_battery_values_loop = 0 ;
+    float pile_current = 0 ;
+    float average_current = 0 ;
+  // Functions
+    // Get Values
+      void get_battery_values()
+      {
+        voltajeSensor= analogRead(PIN_AMP_METER)*(5.0 / 1023.0);                //lectura del sensor hall, medida transformada en valores de 0 a 5 para conocer el valor de tension real del output del sensor HALL
+        corriente_hall = ( voltajeSensor + CORRECT_VOLT_HALL ) * SENSIBILIDAD;  //Ecuación  para obtener la corriente a partir del valor anterior, ajuste de offset y sensibilidad, convertir la señal de voltaje output del sensor HALL en el valor de corriente real
+        voltajeBatt= analogRead(PIN_VOLT_METER)*(CORRECT_VOLT_BATT / 1023.0);   //lectura de volaje 
+        Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
+        porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
+
+
+        corriente_hall = demo_50_50 ;                                           //DEBUG
+
+
+        autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
+        autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
+        autonomia_minutos_totales = autonomia_segundos_totales / 60;            //minutos restantes totales es el valor resultante de dividir los segundos totales entre 60
+        autonomia_minutos = autonomia_minutos_totales % 60;                     //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
+        autonomia_horas_totales = autonomia_minutos_totales / 60;               //horas de autonomia es el resultado de dividir los minutos totales entre 60
+
+        if ( abs(autonomia_horas_totales) > 999 )                        // En caso de que el tiempo de autonomia sea excesivo le ponemos este limite ya desfiguraria los datos en la pantalla nextion
+        {
+          autonomia_horas_totales = 999 ;
+          autonomia_minutos = 59 ;
+          autonomia_segundos = 59 ;
+        }
+
+        pile_current = pile_current + corriente_hall ;    
+
+        get_battery_values_loop = get_battery_values_loop + 1 ;     //cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_values 
+
+        if ( tiempo_medicion <= tiempo_real )                       //Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
+        {
+          average_battery_values();
+          tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;      //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
+        }
+      }
+    // Current Average
+    void average_battery_values()
+    {
+      average_current = pile_current / get_battery_values_loop ;  //Calcula la corriente media 
+      bateriaRestante = bateriaRestante - average_current;        //Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
+
+      pile_current = 0 ;                                          //Resetea la variable donde se acumulan los valores de corriente
+      get_battery_values_loop = 0 ;
+    }
+
+
+// TACHOMETER
+  // Variables y Constantes
+    const int short PULSE_LIMIT        = 2 ;       // Define how many pulses are needed until calcs
+    const int short PULSES_X_SPIN      = 1 ;       // Define how much pulses we get per wheel spin
+    const float     WHEEL_DISTANCE     = 0.0015  ; // Define the wheel spin straight travel
+
+    int short tachometer_count = 0 ; 
+    int       new_time = 0 ;
+    int       last_time = 0 ;
+    int       measuring_time = 0 ;
+    float     pulse_x_second = 0 ;
+    int       rpm = 0 ;
+    int       kmh = 0 ;
 
 // NEXTION
-int corriente_nextion = 0;
-
-// get_battery_values
-float Watt = 0 ;
-float voltajeBatt = 0 ;
-float voltajeSensor = 0 ;
-
-// DEMO_VALUES
-int demo_50_50 = 0 ;
-int demo_0_50 = 0 ;
-
-//{  FUNCTIONS
-
-  void tachometer()  // tachometer_count | measuring_time_ms | pulse_x_second | rpm | kmh
-  {
-    Serial.print("tachometer");
-    tachometer_count = tachometer_count + 1 ;
-    //Serial.print(tachometer_count);          //Debug
-    if( tachometer_count >= PULSE_LIMIT )
+  // Variables
+    int corriente_nextion = 0;
+    //
+  // Send Values
+    void nextion_prints()
     {
-      new_time          = millis();
-      measuring_time_ms = new_time - last_time ;
-      measuring_time_s  = (float)measuring_time_ms / 1000 ;
-      tach_period       = measuring_time_s / (float)tachometer_count ;
-      pulse_x_second    = 1 / tach_period ;
-      //pulse_x_second    = tachometer_count % measuring_time_ms ;
-      rpm               = ( pulse_x_second / (float)PULSES_X_SPIN ) * 60 ;
-      kmh               = rpm * (WHEEL_DISTANCE/1000) * 60 ;
-      
-      //Serial.print(" ");
-      Serial.print(tachometer_count);
-      Serial.print("tc  ");
-      Serial.print( measuring_time_ms );
-      Serial.print("ms  ");
-      Serial.print( measuring_time_s, 3 );
-      Serial.print("s  ");
-      Serial.print( tach_period, 5 );
-      Serial.print("tp  ");
-      Serial.print( pulse_x_second );
-      Serial.print("pps  ");
-      Serial.print(rpm);
-      Serial.print("rpm  ");
-      Serial.print(kmh);
-      Serial.println("kmh  ");
+      //{ CORRIENTE (consumo y recarga) | Listo
+        if (corriente_hall <= 0)
+        {
+          Serial.print( "j2.val=" );
+          Serial.print( 0 );
+          end_send_nextion();
 
-      tachometer_count = 0 ;
-      last_time = new_time;
+          corriente_nextion = abs(corriente_hall) * 2 ;
+          corriente_nextion = map(corriente_nextion, 0, 100, 100, 0);
+          Serial.print( "j1.val=" );
+          Serial.print( corriente_nextion );
+          end_send_nextion();
+        }
+
+        if (corriente_hall >= 0)
+        {
+          Serial.print( "j1.val=" );
+          Serial.print( 100 );
+          end_send_nextion();
+
+          corriente_nextion = corriente_hall * 2 ;
+          Serial.print( "j2.val=" );
+          Serial.print( corriente_nextion );
+          end_send_nextion();
+        }
+      //}
+
+      //{ PORCENTAJE BATERIA | Listo
+        if ( porcentaje_bateria > 100 ){ porcentaje_bateria = 0 ; }
+        if ( porcentaje_bateria < 10 ){
+          Serial.print( "j0.bco=" );
+          Serial.print( 63488 );
+          end_send_nextion();
+        }
+        else {
+          Serial.print( "j0.bco=" );
+          Serial.print( 48631 );
+          end_send_nextion();
+        }
+        Serial.print( "j0.val=" );
+        Serial.print( porcentaje_bateria );
+        end_send_nextion();
+      //}
+
+      //{ AUTONOMIA h/m/s
+        if (corriente_hall < 0){
+          Serial.print( "t0.txt=" );
+          Serial.print("\"");
+          Serial.print( "-" ) ;  //Horas restantes de autonomia
+          Serial.print( "h" );
+          Serial.print("\"");
+          end_send_nextion();
+
+          Serial.print( "t1.txt=" );
+          Serial.print("\"");
+          Serial.print( "-" );        //Minutos restantes de autonomia
+          Serial.print( "m" );
+          Serial.print("\"");
+          end_send_nextion();
+
+          Serial.print( "t2.txt=" );
+          Serial.print("\"");
+          Serial.print( "-" );        //Segundos restantes de autonomia
+          Serial.print( "s" );
+          Serial.print("\"");
+          end_send_nextion();
+        }
+        else{
+          Serial.print( "t0.txt=" );
+          Serial.print("\"");
+          Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
+          Serial.print( "h" );
+          Serial.print("\"");
+          end_send_nextion();
+
+          Serial.print( "t1.txt=" );
+          Serial.print("\"");
+          Serial.print( abs( autonomia_minutos ) );        //Minutos restantes de autonomia
+          Serial.print( "m" );
+          Serial.print("\"");
+          end_send_nextion();
+
+          Serial.print( "t2.txt=" );
+          Serial.print("\"");
+          Serial.print( abs( autonomia_segundos ) );        //Segundos restantes de autonomia
+          Serial.print( "s" );
+          Serial.print("\"");
+          end_send_nextion();
+        }
+      //}
+
+      /*//{ TENSION BATERIA
+        Serial.print(" V:");
+        Serial.print(voltajeBatt);                         //Print Tension
+      //}*/
     }
-  }
-
-  void get_battery_values()
-  {
-    voltajeSensor= analogRead(PIN_AMP_METER)*(5.0 / 1023.0);                //lectura del sensor hall, medida transformada en valores de 0 a 5 para conocer el valor de tension real del output del sensor HALL
-    corriente_hall = ( voltajeSensor + CORRECT_VOLT_HALL ) * SENSIBILIDAD;  //Ecuación  para obtener la corriente a partir del valor anterior, ajuste de offset y sensibilidad, convertir la señal de voltaje output del sensor HALL en el valor de corriente real
-    voltajeBatt= analogRead(PIN_VOLT_METER)*(CORRECT_VOLT_BATT / 1023.0);   //lectura de volaje 
-    Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
-    porcentaje_bateria = (bateriaRestante / 162000)*100;                    //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
-
-
-    corriente_hall = demo_50_50 ;                                           //DEBUG
-
-
-    autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
-    autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
-    autonomia_minutos_totales = autonomia_segundos_totales / 60;            //minutos restantes totales es el valor resultante de dividir los segundos totales entre 60
-    autonomia_minutos = autonomia_minutos_totales % 60;                     //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
-    autonomia_horas_totales = autonomia_minutos_totales / 60;               //horas de autonomia es el resultado de dividir los minutos totales entre 60
-
-    if ( abs(autonomia_horas_totales) > 999 )                        // En caso de que el tiempo de autonomia sea excesivo le ponemos este limite ya desfiguraria los datos en la pantalla nextion
+  // End
+    void end_send_nextion()
     {
-      autonomia_horas_totales = 999 ;
-      autonomia_minutos = 59 ;
-      autonomia_segundos = 59 ;
+      Serial.write(0xff);
+      Serial.write(0xff);
+      Serial.write(0xff);
     }
 
-    pile_current = pile_current + corriente_hall ;    
-
-    get_battery_values_loop = get_battery_values_loop + 1 ;     //cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_values 
-
-    if ( tiempo_medicion <= tiempo_real )                       //Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
-    {
-      average_battery_values();
-      tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;      //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
-    }
-  }
-
-  void average_battery_values()
-  {
-    average_current = pile_current / get_battery_values_loop ;  //Calcula la corriente media 
-    bateriaRestante = bateriaRestante - average_current;        //Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
-
-    pile_current = 0 ;                                          //Resetea la variable donde se acumulan los valores de corriente
-    get_battery_values_loop = 0 ;
-  }
-
-  void nextion_prints()
-  {
-    //{ CORRIENTE (consumo y recarga) | Listo
-      if (corriente_hall <= 0)
-      {
-        Serial.print( "j2.val=" );
-        Serial.print( 0 );
-        end_send_nextion();
-
-        corriente_nextion = abs(corriente_hall) * 2 ;
-        corriente_nextion = map(corriente_nextion, 0, 100, 100, 0);
-        Serial.print( "j1.val=" );
-        Serial.print( corriente_nextion );
-        end_send_nextion();
-      }
-
-      if (corriente_hall >= 0)
-      {
-        Serial.print( "j1.val=" );
-        Serial.print( 100 );
-        end_send_nextion();
-
-        corriente_nextion = corriente_hall * 2 ;
-        Serial.print( "j2.val=" );
-        Serial.print( corriente_nextion );
-        end_send_nextion();
-      }
-    //}
-
-    //{ PORCENTAJE BATERIA | Listo
-      if ( porcentaje_bateria > 100 ){ porcentaje_bateria = 0 ; }
-      if ( porcentaje_bateria < 10 ){
-        Serial.print( "j0.bco=" );
-        Serial.print( 63488 );
-        end_send_nextion();
-      }
-      else {
-        Serial.print( "j0.bco=" );
-        Serial.print( 48631 );
-        end_send_nextion();
-      }
-      Serial.print( "j0.val=" );
-      Serial.print( porcentaje_bateria );
-      end_send_nextion();
-    //}
-
-    //{ AUTONOMIA h/m/s
-      if (corriente_hall < 0){
-        Serial.print( "t0.txt=" );
-        Serial.print("\"");
-        Serial.print( "-" ) ;  //Horas restantes de autonomia
-        Serial.print( "h" );
-        Serial.print("\"");
-        end_send_nextion();
-
-        Serial.print( "t1.txt=" );
-        Serial.print("\"");
-        Serial.print( "-" );        //Minutos restantes de autonomia
-        Serial.print( "m" );
-        Serial.print("\"");
-        end_send_nextion();
-
-        Serial.print( "t2.txt=" );
-        Serial.print("\"");
-        Serial.print( "-" );        //Segundos restantes de autonomia
-        Serial.print( "s" );
-        Serial.print("\"");
-        end_send_nextion();
-      }
-      else{
-        Serial.print( "t0.txt=" );
-        Serial.print("\"");
-        Serial.print( abs( autonomia_horas_totales ) ) ;  //Horas restantes de autonomia
-        Serial.print( "h" );
-        Serial.print("\"");
-        end_send_nextion();
-
-        Serial.print( "t1.txt=" );
-        Serial.print("\"");
-        Serial.print( abs( autonomia_minutos ) );        //Minutos restantes de autonomia
-        Serial.print( "m" );
-        Serial.print("\"");
-        end_send_nextion();
-
-        Serial.print( "t2.txt=" );
-        Serial.print("\"");
-        Serial.print( abs( autonomia_segundos ) );        //Segundos restantes de autonomia
-        Serial.print( "s" );
-        Serial.print("\"");
-        end_send_nextion();
-      }
-    //}
-
-    /*//{ TENSION BATERIA
-      Serial.print(" V:");
-      Serial.print(voltajeBatt);                         //Print Tension
-    //}*/
-  }
-
-  void end_send_nextion()
-  {
-    Serial.write(0xff);
-    Serial.write(0xff);
-    Serial.write(0xff);
-  }
-
+// STRING PRINT [Not Used]
   /*void string_print()
   {
     //{ CORRIENTE BATERIA
@@ -276,51 +274,26 @@ int demo_0_50 = 0 ;
       Serial.println( Watt );                                            //Print Potencia
     //}
   }*/
-//}
 
-void setup()                      //SETUP 
-{
-  Serial.begin(9600);             //Se activa comunicacion serie
-  //Serial.print("setup");          //Debug
+// SETUP
+  void setup()                      //SETUP 
+  {
+    Serial.begin(9600);             //Se activa comunicacion serie
 
-  pinMode(TACHOMETER_PIN, INPUT);
-  attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer, RISING); //interrupcion que llama a la funcion tachometer cuando se detecta un flanco ascendente por el pin TACHOMETER_PIN
-  pinMode(12, OUTPUT);                                                         //Pin para generar impulsos, puentear con TACHOMETER_PIN para realizar pruebas, comentar esta linea cuando se este utilizando una entrada real
-
-  //pinMode(4, OUTPUT);             //Constant 5V
-  //digitalWrite(4, HIGH);          //Constant 5V
-
-  pinMode(2,OUTPUT);              //Constant 5V
-  digitalWrite(2, HIGH);          //Constant 5V
-
-  pinMode(4, OUTPUT);             //Constant GND
-  digitalWrite(4, LOW);           //Constant GND
-}
-
-void loop()                       //LOOP
-{
-  //Serial.print("loop");           //Debug
-  demo_values();
-  get_battery_values(); 
-  //nextion_prints();
-
-  tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
-  
-  digitalWrite(12, LOW);          //Generar pulsos para probar la funcion tachometer con interrupciones, comentar o eliminar estas lineas.
-  delay(100);
-  digitalWrite(12, HIGH);
-  delay(50);
-}
-
-void demo_values()
-{
-  demo_50_50 = demo_50_50 + 1 ;
-  if (demo_50_50 > 50){
-    demo_50_50 = -50 ;
   }
 
-  demo_0_50 = demo_0_50 + 1 ;
-  if (demo_0_50 > 50){
-    demo_0_50 = 0 ;
+// LOOP
+  void loop()                       //LOOP
+  {
+    //Serial.print("loop");           //Debug
+    demo_values();
+    get_battery_values(); 
+    //nextion_prints();
+
+    tiempo_real = (millis()/1000);  //tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
+    
+    digitalWrite(12, LOW);          //Generar pulsos para probar la funcion tachometer con interrupciones, comentar o eliminar estas lineas.
+    delay(100);
+    digitalWrite(12, HIGH);
+    delay(50);
   }
-}
