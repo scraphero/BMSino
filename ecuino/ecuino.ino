@@ -104,8 +104,7 @@ int tiempo_real;
       get_battery_values_loop = 0 ;
     }
 
-
-// TACHOMETER
+// TACHOMETER                    ¡¡FINISH THIS!!
   // Variables y Constantes
     const int short PULSE_LIMIT        = 2 ;       // Define how many pulses are needed until calcs
     const int short PULSES_X_SPIN      = 1 ;       // Define how much pulses we get per wheel spin
