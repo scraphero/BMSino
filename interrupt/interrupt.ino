@@ -2,14 +2,14 @@
 //esta velocidad sera enviada al arduino principal mediante comunicacion en paralelo usando 7 pines digitales.
 
 
-// TACHOMETER PINS {
+// TACHOMETER PINS
 	int short TACHOMETER_PIN     = 3 ;    // Pin for tachometer
 	int short TACHOMETER_GND_PIN = 4 ;    // Pin for tachometer gnd
-// TACHOMETER CONSTANTS {
+// TACHOMETER CONSTANTS
 	int short PULSE_LIMIT        = 2 ;    // Define how many pulses are needed until calcs
 	int short PULSES_X_SPIN      = 1 ;    // Define how much pulses we get per wheel spin
 	float       WHEEL_DISTANCE   = 0.0015  ; // Define the wheel spin straight travel
-// TACHOMETER VARIABLES {
+// TACHOMETER VARIABLES
 	int short tachometer_count = 0 ; 
 	int       new_time = 0 ;
 	int       last_time = 0 ;
@@ -17,26 +17,37 @@
 	float     pulse_x_second = 0 ;
 	int       rpm = 0 ;
 	int       kmh = 0 ;
-// TACHOMETER FUNCTIONS {
-	void tachometer_increment()  // tachometer_count | measuring_time | pulse_x_second | rpm | kmh
-	{		
-		tachometer_count = tachometer_count + 1 ;
-	}
-	void tachometer_cacls()
-	{
-		if( tachometer_count >= PULSE_LIMIT )
+// TACHOMETER FUNCTIONS
+	// Pulse count increment | called from interrupt function
+		void tachometer_increment()
+		{		
+			tachometer_count = tachometer_count + 1 ;
+		}		
+	// Calculations          | On loop
+		void tachometer_cacls()
 		{
-			new_time       = millis();
-			measuring_time = new_time - last_time ;
-			pulse_x_second = float(tachometer_count * 1000) / measuring_time ;   // It was really meant to work as the equation below but this one gets same result and.. works!
-			//pulse_x_second = tachometer_count / float(measuring_time / 1000) ;
-			rpm            = ( pulse_x_second / PULSES_X_SPIN ) * 60 ;
-			kmh            = rpm * WHEEL_DISTANCE * 60 ;
-						
-			tachometer_count = 0 ;
-			last_time = new_time;
+			if( tachometer_count >= PULSE_LIMIT )
+			{
+				new_time       = millis();
+				measuring_time = new_time - last_time ;
+				pulse_x_second = float(tachometer_count * 1000) / measuring_time ;   // It was really meant to work as the equation below but this one gets same result and.. works!
+				//pulse_x_second = tachometer_count / float(measuring_time / 1000) ;
+				rpm            = ( pulse_x_second / PULSES_X_SPIN ) * 60 ;
+				kmh            = rpm * WHEEL_DISTANCE * 60 ;
+							
+				tachometer_count = 0 ;
+				last_time = new_time;
+			}
 		}
-	}
+	// Setup                 | On Setup
+		void tachometer_setup ()
+		{
+			pinMode        ( TACHOMETER_GND_PIN, OUTPUT );
+			digitalWrite   ( TACHOMETER_GND_PIN, LOW );
+			digitalWrite   ( TACHOMETER_PIN    , HIGH );
+			//pinMode        ( TACHOMETER_PIN    , INPUT );
+			attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer_increment, RISING);
+		}
 
 // PARALLEL SPEED PINS {
  int parallel_pin_1  = 13 ;
@@ -79,22 +90,18 @@
 
 // SETUP {
 	void setup(){
-		
+
 		Serial.begin(9600);
 		
-		// PARALLEL COMMUNICATION {
+		// PARALLEL COMMUNICATION
 			pinMode(parallel_pin_1,  OUTPUT);
 			pinMode(parallel_pin_2,  OUTPUT);
 			pinMode(parallel_pin_4,  OUTPUT);
 			pinMode(parallel_pin_8,  OUTPUT);
 			pinMode(parallel_pin_16, OUTPUT);
 			pinMode(parallel_pin_32, OUTPUT); //}
-		// TACHOMETER {
-			pinMode        ( TACHOMETER_GND_PIN, OUTPUT );
-			digitalWrite   ( TACHOMETER_GND_PIN, LOW );
-			digitalWrite   ( TACHOMETER_PIN    , HIGH );
-			//pinMode        ( TACHOMETER_PIN    , INPUT );
-			attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer_increment, RISING);  //}
+		tachometer_setup();
+
 	}
 
 // LOOP {
