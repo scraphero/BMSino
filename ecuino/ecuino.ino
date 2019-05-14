@@ -2,33 +2,33 @@
 
 int tiempo_real;
 
-// PINS                       | For Tachometer and Battery functions
+// PINS                       | Actually only Tachometer and Battery functions are using pins
   // BATTERY
-    const int PIN_AMP_METER = A0;  // AMP METER
-    const int PIN_VOLT_METER = A7; // VOLT METER
+    const int PIN_AMP_METER = A0;       // AMP METER
+    const int PIN_VOLT_METER = A7;      // VOLT METER
   // TACHOMETER
-    int short TACHOMETER_PIN     = 3 ;    // Pin for tachometer
-    int short TACHOMETER_GND_PIN = 4 ;    // Pin for tachometer gnd [NOT NECESSARY BUT FOR LOCATION CONVENIENCE]
+    int short TACHOMETER_PIN     = 3 ;  // Pin for tachometer
+    int short TACHOMETER_GND_PIN = 4 ;  // Pin for tachometer gnd [NOT NECESSARY BUT FOR LOCATION CONVENIENCE]
 
 // DEMO VALUES                | For test and demonstrations values generator
   // Variables
-    int demo_50_50 = 0 ;
-    int demo_0_50 = 0 ;
-    int demo_0_100 = 0 ;
+    int demo_50_50 = 0 ; // -50 to 50
+    int demo_0_50 = 0 ;  // 0 to 50
+    int demo_0_100 = 0 ; // 0 to 100
   // Function
     void demo_values()
     {
-      demo_50_50 = demo_50_50 + 1 ;
-      if ( demo_50_50 > 50 ){ demo_50_50 = -50 ; }
+      demo_50_50 = demo_50_50 + 1 ;                 //value increments by 1
+      if ( demo_50_50 > 50 ){ demo_50_50 = -50 ; }  //values from -50 to +50 again and again
 
-      demo_0_50 = demo_0_50 + 1 ;
-      if ( demo_0_50 > 50 ){ demo_0_50 = 0 ; }
+      demo_0_50 = demo_0_50 + 1 ;                   //value increments by 1
+      if ( demo_0_50 > 50 ){ demo_0_50 = 0 ; }      //value from 0 to 50 again and again
 
-      demo_0_100 = demo_0_100 + 1 ;
-      if ( demo_0_100 > 100 ) {demo_0_100 = 0 ; }
+      demo_0_100 = demo_0_100 + 1 ;                 //value increments by 1
+      if ( demo_0_100 > 100 ) {demo_0_100 = 0 ; }   //value from 0 to 100 again and again
     }
 
-// BATTERY 
+// BATTERY                    | All stuff related with the battery, functions, const and variables etc.
   // Variables y Constantes
     const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
     const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
@@ -47,7 +47,7 @@ int tiempo_real;
     int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
     int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
     int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
-    int long autonomia_minutos_totales = 0;  
+    int long autonomia_minutos_totales = 0; 
     int short autonomia_minutos = 0;
     int long autonomia_horas_totales = 0;
 
@@ -73,34 +73,34 @@ int tiempo_real;
         autonomia_minutos = autonomia_minutos_totales % 60;                     //autonomia en minutos como dato complementario de horas y segundos es el resultado de calcular el resto de la division de los minutos totales entre 60
         autonomia_horas_totales = autonomia_minutos_totales / 60;               //horas de autonomia es el resultado de dividir los minutos totales entre 60
 
-        if ( abs(autonomia_horas_totales) > 999 )                        // En caso de que el tiempo de autonomia sea excesivo le ponemos este limite ya desfiguraria los datos en la pantalla nextion
+        if ( abs(autonomia_horas_totales) > 999 )  // En caso de que el tiempo de autonomia sea excesivo le ponemos este limite ya que desfiguraria los datos en la pantalla nextion
         {
-          autonomia_horas_totales = 999 ;
-          autonomia_minutos = 59 ;
-          autonomia_segundos = 59 ;
+          autonomia_horas_totales = 999 ;          // Valor maximo para la autonomia en horas
+          autonomia_minutos = 59 ;                 // minutos
+          autonomia_segundos = 59 ;                // y segundos
         }
 
-        pile_current = pile_current + corriente_hall ;    
+        pile_current = pile_current + corriente_hall ;              // pile current va acumulando la suma de los valores de corriente de cada medicion para despues realizar la media cada segudo
 
-        get_battery_values_loop = get_battery_values_loop + 1 ;     //cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_current 
+        get_battery_values_loop = get_battery_values_loop + 1 ;     // cuenta el numero de vueltas que se da a esta funcion, sera reseteado desde la funcion average_battery_current 
 
-        if ( tiempo_medicion <= tiempo_real )                       //Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
+        if ( tiempo_medicion <= tiempo_real )                       // Al final de la funcion get_battery_values le sumamos a tiempo_medicion el tiempo en segundos DELAY_MEDICION asi no se volvera a ejecutar la funcion hasta que tiempo_real vuelva a igualar tiempo_medicion
         {
           average_battery_current();
-          tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;      //Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
+          tiempo_medicion = tiempo_medicion + DELAY_MEDICION ;      // Como hemos comentado antes esta linea le añade el tiempo que queremos que retarde entre lecturas
         }
       }
     // Current Average
       void average_battery_current()
       {
-        average_current = pile_current / get_battery_values_loop ;  //Calcula la corriente media 
-        bateriaRestante = bateriaRestante - average_current;        //Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
+        average_current = pile_current / get_battery_values_loop ;  // Calcula la corriente media dividiendo la suma de valores de corriente acumulado entre el numero de veces que se ha tomado esa medicion
+        bateriaRestante = bateriaRestante - average_current;        // Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
 
-        pile_current = 0 ;                                          //Resetea la variable donde se acumulan los valores de corriente
-        get_battery_values_loop = 0 ;
+        pile_current = 0 ;                                          // Resetea la variable donde se acumulan los valores de corriente
+        get_battery_values_loop = 0 ;                               // Resetea el numero de veces que se ha medido la corriente ya que se empieza de cero cada segundo
       }
 
-// TACHOMETER
+// TACHOMETER                 | All stuff related with tachometer, functions, const and variables etc.
   // Variables & Constants
     const int short PULSE_LIMIT        = 2 ;       // Define how many pulses are needed until calcs
     const int short PULSES_X_SPIN      = 1 ;       // Define how much pulses we get per wheel spin
@@ -145,7 +145,7 @@ int tiempo_real;
         attachInterrupt( digitalPinToInterrupt(TACHOMETER_PIN), tachometer_increment, RISING);
       }
 
-// NEXTION
+// NEXTION                    | All stuff related with Nextion display, functions, const and variables etc.
   // Variables
     int corriente_nextion = 0;
     int speed_gauge = 0 ;      // map is needed as 50kmh equals 270 degree for de nextion gauge
@@ -186,7 +186,7 @@ int tiempo_real;
           end_send_nextion();
         }
       }
-    // Battery Level
+    // Battery Level          | Sends 
       void nextion_battery_level()
       {
         /*if ( porcentaje_bateria > 100 ){ porcentaje_bateria = 0 ; }
@@ -211,7 +211,7 @@ int tiempo_real;
         Serial.print("\"");
         end_send_nextion();
       }
-    // Autonomy h/m/s
+    // Autonomy h/m/s         | Sends autonomy values 
       void nextion_autonomy_hms ()
       {
         if (corriente_hall < 0){
@@ -259,28 +259,15 @@ int tiempo_real;
           end_send_nextion();
         }
       }
+    // End communication      | Finishes the communication after any value sending
+      void end_send_nextion()
+      {
+        Serial.write(0xff);
+        Serial.write(0xff);
+        Serial.write(0xff);
+      }
 
-  // Send Values
-    void nextion_prints()
-    {
-      // AUTONOMIA h/m/s
-
-
-
-      /*//{ TENSION BATERIA
-        Serial.print(" V:");
-        Serial.print(voltajeBatt);                         //Print Tension
-      //}*/
-    }
-  // End
-    void end_send_nextion()
-    {
-      Serial.write(0xff);
-      Serial.write(0xff);
-      Serial.write(0xff);
-    }
-
-// STRING PRINT [Not Used]
+// STRING PRINT [Not Used]    | This block functions are for sending the values in a serial string but for this project is not been used at the end
   /*void string_print()
   {
     //{ CORRIENTE BATERIA
@@ -325,32 +312,29 @@ int tiempo_real;
     //}
   }*/
 
-// SETUP
+// SETUP                      | Arduino SETUP
   void setup()                      //SETUP 
   {
-    Serial.begin(9600);             //Se activa comunicacion serie
-    tachometer_setup();
+    Serial.begin(9600);             // Se activa comunicacion serie
+    tachometer_setup();             // Activates pins, sets the interruption
   }
 
-// LOOP
-  void loop()                       //LOOP
+// LOOP                       | Arduino LOOP
+  void loop()                         //LOOP
   {
-    demo_values();                  // Demo Values generator
+    demo_values();                    // Demo Values generator
     
-    get_battery_values();           // Battery
+    get_battery_values();             // Battery
     
-    tachometer_cacls();             // Tachometer
+    tachometer_cacls();               // Tachometer
     
-    kmh = demo_0_50 ;               // Nextion | DEBUG
-    nextion_speed_gauge();          // Nextion | z0.val gauge
-
-    corriente_hall = demo_50_50 ;   // Nextion | DEBUG
-    nextion_battery_current();      // Nextion | bottom progress bars
-    
-    porcentaje_bateria = demo_0_100 ;
-    nextion_battery_level();
-
-    nextion_autonomy_hms ();
+    kmh = demo_0_50 ;                 // Nextion | DEBUG
+    nextion_speed_gauge();            // Nextion | z0.val gauge
+    corriente_hall = demo_50_50 ;     // Nextion | DEBUG
+    nextion_battery_current();        // Nextion | bottom progress bars
+    porcentaje_bateria = demo_0_100 ; // Nextion | DEBUG
+    nextion_battery_level();          // Nextion | battery level
+    nextion_autonomy_hms ();          // Nextion | autonomy hours/minutes/seconds
 
     //nextion_prints();
 
