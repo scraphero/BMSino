@@ -12,9 +12,10 @@ int tiempo_real;
 
 // DEMO VALUES                | For test and demonstrations values generator
   // Variables
-    int demo_50_50 = 0 ; // -50 to 50
-    int demo_0_50 = 0 ;  // 0 to 50
-    int demo_0_100 = 0 ; // 0 to 100
+    int demo_50_50 = 0 ;   // -50 to 50
+    int demo_0_50 = 0 ;    // 0 to 50
+    int demo_0_100 = 0 ;   // 0 to 100
+    int demo_100_0 = 100 ; // 100 to 0
   // Function
     void demo_values()
     {
@@ -26,6 +27,9 @@ int tiempo_real;
 
       demo_0_100 = demo_0_100 + 1 ;                 //value increments by 1
       if ( demo_0_100 > 100 ) {demo_0_100 = 0 ; }   //value from 0 to 100 again and again
+
+      demo_100_0 = demo_100_0 - 1 ;                 //value decriments by 1
+      if ( demo_100_0 < 0 ) {demo_100_0 = 100 ; }   //when 0 starts by 100 again
     }
 
 // BATTERY                    | All stuff related with the battery, functions, const and variables etc.
@@ -156,6 +160,15 @@ int tiempo_real;
         speed_gauge = map( kmh, 0, 50, 0, 270); //map is needed as 50kmh equals 270 degree for de nextion gauge
         Serial.print( "z0.val=" );
         Serial.print( speed_gauge );
+        end_send_nextion();
+      }
+    // Speed Numeric
+      void nextion_speed_numeric ()
+      {
+        Serial.print( "t4.txt=" );
+        Serial.print("\"");
+        Serial.print( kmh ) ;
+        Serial.print("\"");
         end_send_nextion();
       }
     // Battery Current
@@ -329,10 +342,12 @@ int tiempo_real;
     tachometer_cacls();               // Tachometer
     
     kmh = demo_0_50 ;                 // Nextion | DEBUG
-    nextion_speed_gauge();            // Nextion | z0.val gauge
     corriente_hall = demo_50_50 ;     // Nextion | DEBUG
-    nextion_battery_current();        // Nextion | bottom progress bars
-    porcentaje_bateria = demo_0_100 ; // Nextion | DEBUG
+    porcentaje_bateria = demo_100_0 ; // Nextion | DEBUG
+
+    nextion_speed_gauge();            // Nextion | z0.val speed gauge
+    nextion_speed_numeric();          // Nextion | t4.txt speed numeric
+    nextion_battery_current();        // Nextion | j1 & j2 bottom progress bars
     nextion_battery_level();          // Nextion | battery level
     nextion_autonomy_hms ();          // Nextion | autonomy hours/minutes/seconds
 
