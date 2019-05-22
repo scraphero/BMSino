@@ -34,26 +34,29 @@ int tiempo_real;
 
 // BATTERY                    | All stuff related with the battery, functions, const and variables etc.
   // Variables y Constantes
-    const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
-    const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
-    
-    // Voltimetro
-    const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria medimos 5
-
-    // AMPERIMETRO SENSOR HALL
-    const float CORRECT_VOLT_HALL = -2.50;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
-    const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para sensor de 50A
-    float corriente_hall = 0 ;
-
-    float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
-    int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
-  
-    int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
-    int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
-    int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
-    int long autonomia_minutos_totales = 0; 
-    int short autonomia_minutos = 0;
-    int long autonomia_horas_totales = 0;
+    // Setup
+      int Ah = 45 ; //        | Manually set the battery capacity
+    // Time
+      const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
+      const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
+      int tiempo_medicion = 0;                 //Esta variable se usara para tomar los valores de medida cada cierto intervalo de tiempo definido en la siguiente constante
+    // Voltmeter
+      const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria medimos 5
+      //
+    // Ampmeter [hall]
+      const float CORRECT_VOLT_HALL = -2.50;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
+      const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para sensor de 50A
+      float corriente_hall = 0 ;
+    // Battery level
+      float total_battery = 0 ;
+      float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
+      int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
+    // Autonomy
+      int long autonomia_segundos_totales = 0; //Medira la autonomia instantanea expresada en segundos
+      int short autonomia_segundos = 0;        //Autonomia en segundos restantes 
+      int long autonomia_minutos_totales = 0; 
+      int short autonomia_minutos = 0;
+      int long autonomia_horas_totales = 0;
 
     float Watt = 0 ;
     float voltajeBatt = 0 ;
@@ -62,6 +65,12 @@ int tiempo_real;
     float pile_current = 0 ;
     float average_current = 0 ;
   // Functions
+    // Battery Setup
+      void battery_setup()
+      {
+        total_battery = Ah * 3600 ;
+        porcentaje_bateria = total_battery ;
+      }
     // Get Values
       void get_battery_values()
       {
