@@ -35,7 +35,7 @@ int tiempo_real;
 // BATTERY                    | All stuff related with the battery, functions, const and variables etc.
   // Variables y Constantes
     // Setup
-      int Ah = 45 ; //        | Manually set the battery capacity
+      const int Ah = 45 ; //        | Manually set the battery capacity
     // Time
       const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
       const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
@@ -339,6 +339,7 @@ int tiempo_real;
   {
     Serial.begin(9600);             // Se activa comunicacion serie
     tachometer_setup();             // Activates pins, sets the interruption
+    battery_setup();
   }
 
 // LOOP                       | Arduino LOOP
@@ -347,18 +348,24 @@ int tiempo_real;
     demo_values();                    // Demo Values generator
     
     get_battery_values();             // Battery
-    
+
+    //Serial.println(tachometer_increment);
+
+
     tachometer_cacls();               // Tachometer
+
     
-    kmh = demo_0_50 ;                 // Nextion | DEBUG
-    corriente_hall = demo_50_50 ;     // Nextion | DEBUG
-    porcentaje_bateria = demo_100_0 ; // Nextion | DEBUG
+    //kmh = demo_0_50 ;                 // Nextion | DEBUG
+    //corriente_hall = demo_50_50 ;     // Nextion | DEBUG
+    //porcentaje_bateria = demo_100_0 ; // Nextion | DEBUG
+
 
     nextion_speed_gauge();            // Nextion | z0.val speed gauge
     nextion_speed_numeric();          // Nextion | t4.txt speed numeric
     nextion_battery_current();        // Nextion | j1 & j2 bottom progress bars
     nextion_battery_level();          // Nextion | battery level
     nextion_autonomy_hms ();          // Nextion | autonomy hours/minutes/seconds
+
 
     //nextion_prints();
 
