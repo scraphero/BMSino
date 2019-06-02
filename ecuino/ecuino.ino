@@ -36,6 +36,7 @@ int tiempo_real;
   // Variables y Constantes
     // Setup
       const int Ah = 45 ; //        | Manually set the battery capacity
+      //
     // Time
       const int TIEMPO_DE_LECTURA = 100;       //sera el tiempo en milisegundos 
       const int DELAY_MEDICION = 1;            //En este caso el valor es 1 porque queremos que se realice una medicion cada segundo
@@ -48,7 +49,7 @@ int tiempo_real;
       const float SENSIBILIDAD = 65;           //sensibilidad en Voltios/Amperio para sensor de 50A
       float corriente_hall = 0 ;
     // Battery level
-      float total_battery = 0 ;
+      int total_battery = 0 ;
       float bateriaRestante = 162000;          //valor asignado como capacidad total inicialmente, resultado de multiplicar la capacidad de la bateria "45Ah" x 3600s puesto que restaremos el valor medio de corriente medido cada segundo
       int porcentaje_bateria = 0;              //Almacenara el porcentaje de bateria que se calculara a partir de bateriaRestante posteriormente
     // Autonomy
