@@ -47,8 +47,6 @@ int tiempo_real;
       {
         pinMode(PIN_VCC_HALL, OUTPUT);
         digitalWrite(PIN_VCC_HALL, HIGH);
-
-        porcentaje_bateria = total_battery ;
       }
     // Get Values
       void get_battery_values()
@@ -57,7 +55,7 @@ int tiempo_real;
         corriente_hall = ( voltajeSensor + CORRECT_VOLT_HALL ) * SENSIBILIDAD;  //Ecuación  para obtener la corriente a partir del valor anterior, ajuste de offset y sensibilidad, convertir la señal de voltaje output del sensor HALL en el valor de corriente real
         voltajeBatt= analogRead(PIN_VOLT_METER)*(CORRECT_VOLT_BATT / 1023.0);   //lectura de volaje 
         Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
-        porcentaje_bateria = (bateriaRestante / total_battery)*100;             //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
+        porcentaje_bateria = (float(bateriaRestante) / total_battery)*100;             //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
         autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
         autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
@@ -85,11 +83,12 @@ int tiempo_real;
     // Current Average
       void average_battery_current()
       {
-        average_current = pile_current / get_battery_values_loop ;  // Calcula la corriente media dividiendo la suma de valores de corriente acumulado entre el numero de veces que se ha tomado esa medicion
-        bateriaRestante = bateriaRestante - average_current;        // Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
-        if ( bateriaRestante > total_battery ) { bateriaRestante = total_battery ; }
-        pile_current = 0 ;                                          // Resetea la variable donde se acumulan los valores de corriente
-        get_battery_values_loop = 0 ;                               // Resetea el numero de veces que se ha medido la corriente ya que se empieza de cero cada segundo
+        average_current = pile_current / get_battery_values_loop ;                    // Calcula la corriente media dividiendo la suma de valores de corriente acumulado entre el numero de veces que se ha tomado esa medicion
+        bateriaRestante = bateriaRestante - average_current;                          // Cada vez que se ejecute esta linea se restara el valor medido de corriente a las unidades totales de bateria
+        if ( bateriaRestante > total_battery ) { bateriaRestante = total_battery ; }  // establecemos el limite de recarga de la bateria para que no pueda sobrepasar el 100%
+        if ( bateriaRestante < 0 ) { bateriaRestante = 0 ; }                          // Establecemos el limite inferior de carga a 0 para que no pueda entrar en numeros negativos
+        pile_current = 0 ;                                                            // Resetea la variable donde se acumulan los valores de corriente
+        get_battery_values_loop = 0 ;                                                 // Resetea el numero de veces que se ha medido la corriente ya que se empieza de cero cada segundo
       }
 
 // TACHOMETER                 | All stuff related with tachometer, functions, const and variables etc.
@@ -114,12 +113,14 @@ int tiempo_real;
     // Calculations          | On loop
       void tachometer_cacls()
       {
+        new_time       = millis();
+        measuring_time = new_time - last_time ;
+        if ( measuring_time > 2000 ) { kmh = 0 ; }   // velocidad a 0 si tarda mas de 2sec en recibir el siguiente pulso
         if( tachometer_count >= PULSE_LIMIT )
         {
-          new_time       = millis();
-          measuring_time = new_time - last_time ;
-          pulse_x_second = float(tachometer_count * 1000) / measuring_time ;   // It was really meant to work as the equation below but this one gets same result and.. works!
-          //pulse_x_second = tachometer_count / float(measuring_time / 1000) ;
+
+          pulse_x_second = float(tachometer_count * 1000) / measuring_time ;   // It was really meant to work as the equation below but this one gets same result using just one float
+          //pulse_x_second = float(tachometer_count) / (float(measuring_time) / 1000) ;
           rpm            = ( pulse_x_second / PULSES_X_SPIN ) * 60 ;
           kmh            = rpm * WHEEL_DISTANCE * 60 ;
                 
@@ -151,6 +152,7 @@ int tiempo_real;
       //
     // Level (battery)
       int last_porcentaje_bateria = 0 ;
+      //
 
   // Functions
     // Speed Gauge
@@ -181,9 +183,7 @@ int tiempo_real;
     // Battery Current
       void nextion_battery_current ()
       {
-        if (corriente_hall != last_corriente_hall)
-        {
-
+        //if (corriente_hall != last_corriente_hall) {
           if (corriente_hall <= 0)
           {
             Serial.print( "j2.val=" );
@@ -209,7 +209,7 @@ int tiempo_real;
             end_send_nextion();
           }
           last_corriente_hall = corriente_hall ;
-        }
+        //}
       }
     // Battery Level          | Sends 
       void nextion_battery_level()
@@ -388,18 +388,15 @@ int tiempo_real;
 
     //Serial.print(voltajeSensor);
     //Serial.print(" | ");
-    Serial.println(bateriaRestante);
+    //Serial.println(corriente_nextion);
 
     //demo_values();                    // Demo Values generator
 
-/*
     nextion_speed_gauge();            // Nextion | z0.val speed gauge
     nextion_speed_numeric();          // Nextion | t4.txt speed numeric
     nextion_battery_current();        // Nextion | j1 & j2 bottom progress bars
     nextion_battery_level();          // Nextion | battery level
     nextion_autonomy_hms ();          // Nextion | autonomy hours/minutes/seconds
-*/
-
 
     //nextion_prints();
 
