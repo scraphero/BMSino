@@ -21,8 +21,8 @@ int tiempo_real;
       const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria medimos 5
       //
     // Ampmeter [hall]
-      const float CORRECT_VOLT_HALL = -2.26;   //Para restar el voltage que registra el sensor hall cuando la corriente es = 0
-      const float SENSIBILIDAD = 65;            //sensibilidad en Voltios/Amperio para sensor de 50A
+      const float CORRECT_VOLT_HALL = -2.26;   // Para restar el voltaje que registra el sensor hall cuando la corriente es = 0
+      const float SENSIBILIDAD = 22;           // Equivalencia de Voltios de salida del sensor hall con respecto a los amperios reales
       float corriente_hall = 0 ;
     // Battery level
       const int long total_battery      = 162000 ;  // Constante para la capacidad total de la bateria
@@ -386,9 +386,12 @@ int tiempo_real;
 
     tachometer_cacls();               // Tachometer
 
-    //Serial.print(voltajeSensor);
-    //Serial.print(" | ");
-    //Serial.println(corriente_nextion);
+    //Serial.print(voltajeSensor);      // DEBUG
+    //Serial.print("VSens | ");         // DEBUG
+    //Serial.print(corriente_hall);     // DEBUG
+    //Serial.print("hall | ");          // DEBUG
+    //Serial.print(corriente_nextion);  // DEBUG
+    //Serial.print("nextion | ");       // DEBUG
 
     //demo_values();                    // Demo Values generator
 
@@ -398,7 +401,7 @@ int tiempo_real;
     nextion_battery_level();          // Nextion | battery level
     nextion_autonomy_hms ();          // Nextion | autonomy hours/minutes/seconds
 
-    //nextion_prints();
+    Serial.println();
 
     tiempo_real = (millis()/1000);  // tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   }
