@@ -21,8 +21,8 @@ int tiempo_real;
       const float CORRECT_VOLT_BATT = 49.8;    //La bateria proporciona alrededor de 50V a la que fisicamente se le ha aplicado un divisor de tension de 10:1 asique para 50V de bateria medimos 5
       //
     // Ampmeter [hall]
-      const float CORRECT_VOLT_HALL = -2.26;   // Para restar el voltaje que registra el sensor hall cuando la corriente es = 0
-      const float SENSIBILIDAD = 22;           // Equivalencia de Voltios de salida del sensor hall con respecto a los amperios reales
+      const float CORRECT_VOLT_HALL = -2.29;   // Para restar el voltaje que registra el sensor hall cuando la corriente es = 0
+      const float SENSIBILIDAD = 27;           // Equivalencia de Voltios de salida del sensor hall con respecto a los amperios reales
       float corriente_hall = 0 ;
     // Battery level
       const int long total_battery      = 162000 ;  // Constante para la capacidad total de la bateria
@@ -55,7 +55,7 @@ int tiempo_real;
         corriente_hall = ( voltajeSensor + CORRECT_VOLT_HALL ) * SENSIBILIDAD;  //Ecuación  para obtener la corriente a partir del valor anterior, ajuste de offset y sensibilidad, convertir la señal de voltaje output del sensor HALL en el valor de corriente real
         voltajeBatt= analogRead(PIN_VOLT_METER)*(CORRECT_VOLT_BATT / 1023.0);   //lectura de volaje 
         Watt = voltajeBatt * corriente_hall ;                                   //Potencia = V * I
-        porcentaje_bateria = (float(bateriaRestante) / total_battery)*100;             //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
+        porcentaje_bateria = (float(bateriaRestante) / total_battery)*100;      //Sencilla operacion para calcular en forma de porcentaje la bateria restante a partir de esas unidades sin magnitud que nos hemos inventado
 
         autonomia_segundos_totales = abs( bateriaRestante / corriente_hall ) ;  //autonomia_segundos_totales sera tiempo restante de bateria en segundos, sera un valor instantaneo
         autonomia_segundos = autonomia_segundos_totales % 60;                   //autonomia en segundos como dato complementario de horas y minutos es el resultado de calcular el resto de la division de los segundos totales entre 60
@@ -402,6 +402,7 @@ int tiempo_real;
     nextion_autonomy_hms ();          // Nextion | autonomy hours/minutes/seconds
 
     Serial.println();
+    end_send_nextion();
 
     tiempo_real = (millis()/1000);  // tiempo_real almacenara el tiempo en segundos para ello hemos dividido millis entre 1000
   }
